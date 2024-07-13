@@ -1,0 +1,8 @@
+[gd_scene load_steps=2 format=3 uid="uid://dyjn6mojhpymw"]
+
+[ext_resource type="Script" path="res://dungeon_creator.gd" id="1_ki5sn"]
+
+[node name="DungeonCreator" type="DungeonCreator"]
+script = ExtResource("1_ki5sn")
+
+[node name="HTTPRequest" type="HTTPRequest" parent="."]

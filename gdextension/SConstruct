@@ -1,0 +1,42 @@
+import os
+env = SConscript('godot-cpp/SConstruct')
+
+env.Append(CPPPATH="src/")
+#env.Append(CPPPATH="godot-cpp/include/libcurl")
+
+#env.Append(LIBPATH="lib")
+#env.Append(LIB="libcurl-x64.dll")
+
+libcurl_dll = 'lib/curl/libcurl.dll'
+
+libcurl_lib_dir = 'lib/curl'
+
+env.Append(LIBPATH=[libcurl_lib_dir])
+
+env.Append(LIBS=['curl'])
+
+env.Append(LIBS=[
+    'Normaliz.lib',
+    'Ws2_32',   # Windows Sockets API
+    'Wldap32',  # Windows LDAP client API
+    'Crypt32',  # Windows Cryptography API
+    'advapi32', # Advanced Windows API
+])
+
+env.Append(LINKFLAGS=['/SUBSYSTEM:CONSOLE'])
+
+src = Glob("src/*.cpp")
+
+def copy_dll(target, source, env):
+    for t in target:
+        env.Install(os.path.dirname(t.abspath), libcurl_dll)
+
+if env['platform'] == 'linux':
+    pass
+elif env['platform'] == 'windows':
+    libpath = '../libtest{}{}'.format(env['suffix'], env['SHLIBSUFFIX'])
+    sharedLib = env.SharedLibrary(libpath, src)
+    env.AddPostAction(sharedLib, copy_dll)
+    Default(sharedLib)
+elif env['platform'] == 'android':
+    pass
