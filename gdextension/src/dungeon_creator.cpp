@@ -11,13 +11,22 @@ DungeonCreator::DungeonCreator()
     // ADDING THE CHILD CRASHES FOR SOME REASON
 
     //add_child(http_request, false, INTERNAL_MODE_FRONT);
-    http_request->connect("request_completed", Callable(this, "_on_request_completed"));
+    //add_child(http_request);
+    
 }
 
 DungeonCreator::~DungeonCreator()
 {
     memdelete(http_request);
 }
+
+int DungeonCreator::NOTIFICATION_POSTINITIALIZE()
+{
+    UtilityFunctions::print("post init");
+    return 0;
+}
+
+
 
 void DungeonCreator::start_test()
 {
@@ -156,7 +165,7 @@ std::string DungeonCreator::GetCompletion(const std::string& prompt, const std::
         curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response);
         CURLcode res = curl_easy_perform(curl);
 
-        //UtilityFunctions::print("Gets past easy perform");
+        //UtilityFunctions::print("Gets past easy perform");d 
         std::cout << "Gets past easy perform" << std::endl;
         if (res != CURLE_OK)
         {
@@ -211,20 +220,26 @@ void DungeonCreator::_bind_methods()
 
 String DungeonCreator::DownloadFile(const String& url)
 {
+    http_request->connect("request_completed", Callable(this, "_on_request_completed"));
     http_request->request(url);
     return String("done");
 }
 
 String DungeonCreator::DownloadFileRequest(const String& url, HTTPRequest* request)
 {
+    UtilityFunctions::print("Actually runs this function seemingly");
     // Runs but doesnt do anything. i think I need to test the saving on a random image (DISCORD IMAGE PERHAPS)
     request->connect("request_completed", Callable(this, "_on_request_completed"));
+    UtilityFunctions::print("Function has been connected");
     request->request(url);
+    UtilityFunctions::print("Request completed");
+    //request->get_download_file();
     return String("done");
 }
 
 void DungeonCreator::_on_request_completed(int result, int response_code, PackedStringArray headers, PackedByteArray body)
 {
+    UtilityFunctions::print("Entered the on request completed func");
     if (response_code == 200)
     {
         Ref<Image> image = memnew(Image);

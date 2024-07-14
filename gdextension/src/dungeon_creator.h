@@ -45,6 +45,8 @@ class DungeonCreator : public Node2D{
 
    HTTPRequest* http_request;
 
+   int NOTIFICATION_POSTINITIALIZE();
+
    public:
    String GetGPTString();
    void SetGPTString(String input);
@@ -53,6 +55,7 @@ class DungeonCreator : public Node2D{
 
    protected:
    static void _bind_methods();
+   
 };
 
 
