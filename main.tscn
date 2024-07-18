@@ -1,0 +1,13 @@
+[gd_scene load_steps=3 format=3 uid="uid://lpuueyrhkkn7"]
+
+[ext_resource type="PackedScene" uid="uid://dyjn6mojhpymw" path="res://dungeon_creator.tscn" id="1_dd6e3"]
+[ext_resource type="Script" path="res://camera_2d.gd" id="2_305vt"]
+
+[node name="Main" type="Node2D"]
+
+[node name="DungeonCreator" parent="." instance=ExtResource("1_dd6e3")]
+
+[node name="Camera2D" type="Camera2D" parent="."]
+zoom = Vector2(0.5, 0.5)
+script = ExtResource("2_305vt")
+SPEED = 500.0

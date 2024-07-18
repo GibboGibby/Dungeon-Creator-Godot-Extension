@@ -7,6 +7,9 @@
 #include <godot_cpp/classes/http_request.hpp>
 #include <godot_cpp/classes/image.hpp>
 #include <godot_cpp/classes/file_access.hpp>
+#include <godot_cpp/classes/random_number_generator.hpp>
+#include <godot_cpp/classes/tile_map.hpp>
+#include <map>
 #include <libcurl/curl/curl.h>
 #include <string>
 
@@ -14,10 +17,31 @@
 
 using namespace godot;
 
+
+
+struct DungeonLevel
+{
+   DungeonLevel()
+   {
+      memset(roomLayout, -1, sizeof(int) * 4 * 4);
+      startingPosition = Vector2i(-1,-1);
+      endingPosition = Vector2i(-1,-1);
+   }
+   int roomLayout[4][4];
+   Vector2i startingPosition;
+   Vector2i endingPosition;
+   std::string roomString[4][4];
+};
+
 class DungeonCreator : public Node2D{
    GDCLASS(DungeonCreator, Node2D);
 
+   
+
    public:
+   DungeonLevel level;
+
+   std::map<std::string, Vector2i> blocks;
 
    DungeonCreator();
    ~DungeonCreator();
@@ -39,9 +63,25 @@ class DungeonCreator : public Node2D{
    //Downloading Image
    void _on_request_completed(int result, int response_code, PackedStringArray headers, PackedByteArray body);
 
+   void GenerateDungeon();
+
+   void Display4x4(int grid[4][4]);
+   void Display4x4(std::string grid[4][4]);
+   
+   int GibRand(RandomNumberGenerator* rng, int x, int y);
+   std::string GetRoomLayout(int x, int y);
+
+   void GenerateTiles(TileMap* tilemap);
+   void GenerateChunk(TileMap* tilemap, int x, int y);
+   void AddTilemapEdge(TileMap* tilemap);
+   Vector2i GetBlockAtlasPos(RandomNumberGenerator* rng, char type);
+
+
    private:
    String GPTString = "Empty";
    String imageString = "Empty";
+
+   
 
    HTTPRequest* http_request;
 
