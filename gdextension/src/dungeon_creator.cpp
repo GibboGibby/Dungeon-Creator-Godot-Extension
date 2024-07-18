@@ -739,9 +739,9 @@ void DungeonCreator::GenerateChunk(TileMap* tilemap, int x, int y)
 
 void DungeonCreator::AddTilemapEdge(TileMap* tilemap)
 {
-    for (int i = -50; i < 50; i++)
+    for (int i = -75; i < 75; i++)
     {
-        for (int j = -50; j < 50; j++)
+        for (int j = -75; j < 75; j++)
         {
             Vector2i pos(i,j);
             tilemap->set_cell(0, pos, 0, Vector2i(15,23));
