@@ -6,9 +6,7 @@ extends DungeonCreator
 func _ready() -> void:
 	generate_tilemap_edge(tile_map)
 	DoAllTheGenerating()
-		#download_from_url(imageUrl)
-		#download_from_url_request(imageUrl, http_request)
-	pass # Replace with function body.
+	
 
 func DoAllTheGenerating():
 	generate_dungeon()
