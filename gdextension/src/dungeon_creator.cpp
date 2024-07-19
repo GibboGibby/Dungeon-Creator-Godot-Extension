@@ -16,7 +16,7 @@ DungeonCreator::DungeonCreator()
     blocks = std::map<std::string, Vector2i>{
         {"dirt", Vector2i(0,1)},
         {"stone", Vector2i(0,0)},
-        {"wall", Vector2i(15,23)},
+        {"wall", Vector2i(28,19)},
         {"empty", Vector2i(-1,-1)}
     };
     
@@ -739,12 +739,13 @@ void DungeonCreator::GenerateChunk(TileMap* tilemap, int x, int y)
 
 void DungeonCreator::AddTilemapEdge(TileMap* tilemap)
 {
-    for (int i = -75; i < 75; i++)
+    for (int i = -74; i < 75; i += 3)
     {
-        for (int j = -75; j < 75; j++)
+        for (int j = -75; j < 74; j += 3)
         {
             Vector2i pos(i,j);
-            tilemap->set_cell(0, pos, 0, Vector2i(15,23));
+            
+            tilemap->set_cell(0, pos, 0, blocks["wall"]);
         }
     }
 }
