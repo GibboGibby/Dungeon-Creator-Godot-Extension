@@ -737,6 +737,8 @@ void DungeonCreator::GenerateChunk(TileMap* tilemap, int x, int y)
 
 }
 
+// This should set all to a base edge
+// And then in the generation, setting the edges to the correct facing edge
 void DungeonCreator::AddTilemapEdge(TileMap* tilemap)
 {
     for (int i = -74; i < 75; i += 3)
