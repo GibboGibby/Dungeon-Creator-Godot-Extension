@@ -76,6 +76,8 @@ class DungeonCreator : public Node2D{
    void AddTilemapEdge(TileMap* tilemap);
    Vector2i GetBlockAtlasPos(RandomNumberGenerator* rng, char type);
 
+   std::string AddObstacles(std::string strTemp, RandomNumberGenerator* rng);
+
 
    private:
    String GPTString = "Empty";

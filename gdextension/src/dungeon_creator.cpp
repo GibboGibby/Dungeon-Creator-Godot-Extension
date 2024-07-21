@@ -17,6 +17,8 @@ DungeonCreator::DungeonCreator()
         {"dirt", Vector2i(0,1)},
         {"stone", Vector2i(0,0)},
         {"wall", Vector2i(28,19)},
+        {"ladder", Vector2i(2,0)},
+        {"ladder_top", Vector2i(3,0)},
         {"empty", Vector2i(-1,-1)}
     };
     
@@ -614,7 +616,7 @@ std::string DungeonCreator::GetRoomLayout(int x, int y)
 	        case 11: { strTemp = "11111111111111112222111220000011200000000000000000000000000012000000001120000211"; break; }
 	        case 12: { strTemp = "11111111112111111112021111112000211112000002112000000022000002200002201111001111"; break; }
 	    }
-        strTemp = "00000000000000000000000000000000000000000000000000000000000000000000000000000000";
+        
 	}
 
     /*
@@ -634,7 +636,91 @@ std::string DungeonCreator::GetRoomLayout(int x, int y)
         //strTemp = "00000000000111111110011000000001111111100110000110011000011001111111100000000000";
    }
     
+    std::string finalOutput = AddObstacles(strTemp);
+    return finalOutput;
+}
+
+std::string DungeonCreator::AddObstacles(std::string strTemp, RandomNumberGenerator* rng)
+{
+    // Remove once function works and stuff
     return strTemp;
+    for (i = 1; i < 81; i += 1)
+	{
+	    j = i;
+  
+	    std::string strObs1 = "00000";
+	    std::string strObs2 = "00000";
+	    std::string strObs3 = "00000";
+	    //char tile = string_char_at(strTemp, i);
+        char tile = strTemp.at(i);
+    
+	    if (tile == '8')
+	    {
+	        switch(GibRand(rng, 1,8))
+	        {
+	            case 1: { strObs1 = "00900"; strObs2 = "01110"; strObs3 = "11111"; break; }
+	            case 2: { strObs1 = "00900"; strObs2 = "02120"; strObs3 = "02120"; break; }
+	            case 3: { strObs1 = "00000"; strObs2 = "00000"; strObs3 = "92222"; break; }
+	            case 4: { strObs1 = "00000"; strObs2 = "00000"; strObs3 = "22229"; break; }
+	            case 5: { strObs1 = "00000"; strObs2 = "11001"; strObs3 = "19001"; break; }
+	            case 6: { strObs1 = "00000"; strObs2 = "10011"; strObs3 = "10091"; break; }
+	            case 7: { strObs1 = "11111"; strObs2 = "10001"; strObs3 = "40094"; break; }
+	            case 8: { strObs1 = "00000"; strObs2 = "12021"; strObs3 = "12921"; break; }
+	        }
+	    }
+	    else if (tile == "5") // ground
+	    {
+	        switch(GibRand(rng, 1,16))
+	        {
+	            case 1: { strObs1 = "11111"; strObs2 = "00000"; strObs3 = "00000"; break; }
+	            case 2: { strObs1 = "00000"; strObs2 = "11110"; strObs3 = "00000"; break; }
+	            case 3: { strObs1 = "00000"; strObs2 = "01111"; strObs3 = "00000"; break; }
+	            case 4: { strObs1 = "00000"; strObs2 = "00000"; strObs3 = "11111"; break; }
+	            case 5: { strObs1 = "00000"; strObs2 = "20200"; strObs3 = "17177"; break; }
+	            case 6: { strObs1 = "00000"; strObs2 = "02020"; strObs3 = "71717"; break; }
+	            case 7: { strObs1 = "00000"; strObs2 = "00202"; strObs3 = "77171"; break; }
+	            case 8: { strObs1 = "00000"; strObs2 = "22200"; strObs3 = "11100"; break; }
+	            case 9: { strObs1 = "00000"; strObs2 = "02220"; strObs3 = "01110"; break; }
+	            case 10: { strObs1 = "00000"; strObs2 = "00222"; strObs3 = "00111"; break; }
+	            case 11: { strObs1 = "11100"; strObs2 = "22200"; strObs3 = "00000"; break; }
+	            case 12: { strObs1 = "01110"; strObs2 = "02220"; strObs3 = "00000"; break; }
+	            case 13: { strObs1 = "00111"; strObs2 = "00222"; strObs3 = "00000"; break; }
+	            case 14: { strObs1 = "00000"; strObs2 = "02220"; strObs3 = "21112"; break; }
+	            case 15: { strObs1 = "00000"; strObs2 = "20100"; strObs3 = "77117"; break; }
+	            case 16: { strObs1 = "00000"; strObs2 = "00102"; strObs3 = "71177"; break; }
+	        }
+	    }
+	    else if (tile == "6") // air
+	    {
+	        switch(GibRand(rng, 1,10))
+	        {
+	            case 1: { strObs1 = "11111"; strObs2 = "00000"; strObs3 = "00000"; break; }
+	            case 2: { strObs1 = "22222"; strObs2 = "00000"; strObs3 = "00000"; break; }
+	            case 3: { strObs1 = "11100"; strObs2 = "22200"; strObs3 = "00000"; break; }
+	            case 4: { strObs1 = "01110"; strObs2 = "02220"; strObs3 = "00000"; break; }
+	            case 5: { strObs1 = "00111"; strObs2 = "00222"; strObs3 = "00000"; break; }
+	            case 6: { strObs1 = "00000"; strObs2 = "01110"; strObs3 = "00000"; break; }
+	            case 7: { strObs1 = "00000"; strObs2 = "01110"; strObs3 = "02220"; break; }
+	            case 8: { strObs1 = "00000"; strObs2 = "02220"; strObs3 = "01110"; break; }
+	            case 9: { strObs1 = "00000"; strObs2 = "00220"; strObs3 = "01111"; break; }
+	            case 10: { strObs1 = "00000"; strObs2 = "22200"; strObs3 = "11100"; break; }
+	        }
+	    }
+    
+	    if (tile == "5" or tile == "6" or tile == "8")
+	    {
+            // Delete 5 chars from strTemp at j
+	        strTemp = string_delete(strTemp, j, 5);
+            // Insert from strObs into strTemp at j
+	        strTemp = string_insert(strObs1, strTemp, j);
+	        j += 10;
+	        strTemp = string_delete(strTemp, j, 5);
+	        strTemp = string_insert(strObs2, strTemp, j);
+	        j += 10;
+	        strTemp = string_delete(strTemp, j, 5);
+	        strTemp = string_insert(strObs3, strTemp, j);
+	    }
+	}
 }
 
 void DungeonCreator::GenerateTiles(TileMap* tilemap)
@@ -777,6 +863,14 @@ Vector2i DungeonCreator::GetBlockAtlasPos(RandomNumberGenerator* rng, char type)
         {
             block = "dirt";
         }
+    }
+    else if (type == 'L')
+    {
+        block = "ladder";
+    }
+    else if(type == 'P')
+    {
+        block = "ladder_top";
     }
     else
     {
