@@ -51,9 +51,10 @@ class DungeonCreator : public Node2D{
    void start_test();
    static size_t WriteCallback(void* contents, size_t size, size_t nmemb, std::string* response);
    std::string GetCompletion(const std::string& prompt, const std::string& model = "gpt-3.5-turbo");
-   std::string GetImage(const std::string& prompt);
+   std::string GetImage(const std::string& prompt, const std::string& model = "dall-e-2");
 
    String GetImageGodotOnly(String prompt);
+   String GetImageGodotOnly3(String prompt);
 
    String DownloadFile(const String& url);
 
@@ -74,7 +75,10 @@ class DungeonCreator : public Node2D{
    void GenerateTiles(TileMap* tilemap);
    void GenerateChunk(TileMap* tilemap, int x, int y);
    void AddTilemapEdge(TileMap* tilemap);
-   Vector2i GetBlockAtlasPos(RandomNumberGenerator* rng, char type);
+   Vector2i GetBlockAtlasPos(RandomNumberGenerator* rng, char type, bool startRoom = false);
+
+   std::string string_insert(std::string toInsert, std::string original, int pos);
+   std::string string_delete(std::string string, int pos, int amount);
 
    std::string AddObstacles(std::string strTemp, RandomNumberGenerator* rng);
 

@@ -19,6 +19,8 @@ DungeonCreator::DungeonCreator()
         {"wall", Vector2i(28,19)},
         {"ladder", Vector2i(2,0)},
         {"ladder_top", Vector2i(3,0)},
+        {"entrance", Vector2i(6,7)},
+        {"exit", Vector2i(7,7)},
         {"empty", Vector2i(-1,-1)}
     };
     
@@ -63,7 +65,7 @@ String DungeonCreator::gpt_complete()
     return newString;
 }
 
-std::string DungeonCreator::GetImage(const std::string& prompt)
+std::string DungeonCreator::GetImage(const std::string& prompt, const std::string& model)
 {
     std::string apiKey = "sk-proj-QP7gwmynJNQGPhWlwXCXT3BlbkFJz0ridvHNwxDLxobZy5pZ";
     std::string baseUrl = "https://api.openai.com/v1/images/generations";
@@ -79,11 +81,12 @@ std::string DungeonCreator::GetImage(const std::string& prompt)
     headers = curl_slist_append(headers, "Content-Type: application/json");
 
     nlohmann::json jsonData;
+    UtilityFunctions::print(("generating image using " + model + " model").c_str());
+    jsonData["model"] = model;
     jsonData["prompt"] = prompt;
-    jsonData["n"] = 1;
     jsonData["size"] = "256x256";
+    jsonData["n"] = 1;
     //jsonData["size"] = "1024x1024";
-    //jsonData["model"] = "dall-e-2";
 
     std::string jsonString = jsonData.dump();
 
@@ -198,11 +201,19 @@ String DungeonCreator::GetImageGodotOnly(String prompt)
     std::string newStr = GetImage(str);
 
     // Download Image
-
-
     return String(newStr.c_str());
 }
 
+String DungeonCreator::GetImageGodotOnly3(String prompt)
+{
+    // Get image URL
+    std::string str = prompt.utf8().get_data();
+    std::string model = "dall-e-2";
+    std::string newStr = GetImage(str, model);
+
+    // Download Image
+    return String(newStr.c_str());
+}
 
 void DungeonCreator::_bind_methods()
 {
@@ -217,6 +228,7 @@ void DungeonCreator::_bind_methods()
    ClassDB::bind_method(D_METHOD("SetImageString", "input"), &DungeonCreator::SetImageString);
 
    ClassDB::bind_method(D_METHOD("create_gpt_image", "prompt"), &DungeonCreator::GetImageGodotOnly);
+   ClassDB::bind_method(D_METHOD("create_gpt_image_3", "prompt"), &DungeonCreator::GetImageGodotOnly3);
 
    ClassDB::bind_method(D_METHOD("has_internet_connection"), &DungeonCreator::UserHasConnection);
 
@@ -494,7 +506,7 @@ std::string DungeonCreator::GetRoomLayout(int x, int y)
         int typeAbove = level.roomLayout[y+1][x];
         //int n = (typeAbove == 2) ? GibRand(rng,2,4) : GibRand(rng,3,6);
         int n;
-        if (type == 2) 
+        if (typeAbove == 2) 
         {
             n = GibRand(rng,2,4);
         }
@@ -635,8 +647,8 @@ std::string DungeonCreator::GetRoomLayout(int x, int y)
    {
         //strTemp = "00000000000111111110011000000001111111100110000110011000011001111111100000000000";
    }
-    
-    std::string finalOutput = AddObstacles(strTemp);
+    std::string finalOutput = strTemp;
+    finalOutput = AddObstacles(strTemp, rng);
     return finalOutput;
 }
 
@@ -644,9 +656,9 @@ std::string DungeonCreator::AddObstacles(std::string strTemp, RandomNumberGenera
 {
     // Remove once function works and stuff
     return strTemp;
-    for (i = 1; i < 81; i += 1)
+    for (int i = 1; i < 81; i += 1)
 	{
-	    j = i;
+	    int j = i;
   
 	    std::string strObs1 = "00000";
 	    std::string strObs2 = "00000";
@@ -668,7 +680,7 @@ std::string DungeonCreator::AddObstacles(std::string strTemp, RandomNumberGenera
 	            case 8: { strObs1 = "00000"; strObs2 = "12021"; strObs3 = "12921"; break; }
 	        }
 	    }
-	    else if (tile == "5") // ground
+	    else if (tile == '5') // ground
 	    {
 	        switch(GibRand(rng, 1,16))
 	        {
@@ -690,7 +702,7 @@ std::string DungeonCreator::AddObstacles(std::string strTemp, RandomNumberGenera
 	            case 16: { strObs1 = "00000"; strObs2 = "00102"; strObs3 = "71177"; break; }
 	        }
 	    }
-	    else if (tile == "6") // air
+	    else if (tile == '6') // air
 	    {
 	        switch(GibRand(rng, 1,10))
 	        {
@@ -707,8 +719,9 @@ std::string DungeonCreator::AddObstacles(std::string strTemp, RandomNumberGenera
 	        }
 	    }
     
-	    if (tile == "5" or tile == "6" or tile == "8")
+	    if (tile == '5' || tile == '6' || tile == '8')
 	    {
+            
             // Delete 5 chars from strTemp at j
 	        strTemp = string_delete(strTemp, j, 5);
             // Insert from strObs into strTemp at j
@@ -719,8 +732,21 @@ std::string DungeonCreator::AddObstacles(std::string strTemp, RandomNumberGenera
 	        j += 10;
 	        strTemp = string_delete(strTemp, j, 5);
 	        strTemp = string_insert(strObs3, strTemp, j);
+            
 	    }
 	}
+}
+
+std::string DungeonCreator::string_insert(std::string toInsert, std::string original, int pos)
+{
+    pos = pos - 1;
+    original.insert(pos, toInsert);
+}
+
+std::string DungeonCreator::string_delete(std::string string, int pos, int amount)
+{
+    pos = pos;
+    string.erase(pos, amount);
 }
 
 void DungeonCreator::GenerateTiles(TileMap* tilemap)
@@ -738,10 +764,11 @@ void DungeonCreator::GenerateTiles(TileMap* tilemap)
 
 void DungeonCreator::GenerateChunk(TileMap* tilemap, int x, int y)
 {
-    
+    bool isStartRoom = false;
     Vector2i block(0,1);
     if (x == level.startingPosition.x && y == level.startingPosition.y)
     {
+        isStartRoom = true;
         block.x = 0;
         block.y = 1;
     }
@@ -780,12 +807,14 @@ void DungeonCreator::GenerateChunk(TileMap* tilemap, int x, int y)
     }
 
     RandomNumberGenerator* rng = memnew(RandomNumberGenerator);
+    
+    
     //UtilityFunctions::print("printing new order: ");
     for (int i = 0; i < 8; i++)
     {
         for (int j = 0; j < 10; j++)
         {
-            Vector2i atlasPos = GetBlockAtlasPos(rng, levelRows[i][j]);
+            Vector2i atlasPos = GetBlockAtlasPos(rng, levelRows[i][j], isStartRoom);
             if (atlasPos.x == -1 && atlasPos.y == -1)
             {
                 tilemap->erase_cell(0, Vector2i(j,i) + offsetAmount);
@@ -839,7 +868,7 @@ void DungeonCreator::AddTilemapEdge(TileMap* tilemap)
 }
  
 // Returns (-1,-1) if the block should not be placed
-Vector2i DungeonCreator::GetBlockAtlasPos(RandomNumberGenerator* rng, char type)
+Vector2i DungeonCreator::GetBlockAtlasPos(RandomNumberGenerator* rng, char type, bool startRoom)
 {
     std::string block = "empty";
     if (type == '1')
@@ -871,6 +900,20 @@ Vector2i DungeonCreator::GetBlockAtlasPos(RandomNumberGenerator* rng, char type)
     else if(type == 'P')
     {
         block = "ladder_top";
+    }
+    else if (type == '9')
+    {
+        UtilityFunctions::print("found a number 9");
+        if (startRoom)
+        {
+            block = "entrance";
+            UtilityFunctions::print("It was a starting room");
+        }
+        else
+        {
+            block = "exit";
+            UtilityFunctions::print("it was an exit room");
+        }
     }
     else
     {
