@@ -73,7 +73,18 @@
 		"xmemory": "cpp",
 		"xtr1common": "cpp",
 		"xtree": "cpp",
-		"xutility": "cpp"
+		"xutility": "cpp",
+		"condition_variable": "cpp",
+		"coroutine": "cpp",
+		"deque": "cpp",
+		"future": "cpp",
+		"queue": "cpp",
+		"random": "cpp",
+		"shared_mutex": "cpp",
+		"stack": "cpp",
+		"typeindex": "cpp",
+		"unordered_set": "cpp",
+		"variant": "cpp"
 	},
 	"C_Cpp.errorSquiggles": "disabled"
 }

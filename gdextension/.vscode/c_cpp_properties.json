@@ -5,7 +5,8 @@
             "includePath": [
                 "${workspaceFolder}/godot-cpp/gdextension",
                 "${workspaceFolder}/godot-cpp/include",
-                "${workspaceFolder}/godot-cpp/gen/include"
+                "${workspaceFolder}/godot-cpp/gen/include",
+                "${workspaceFolder}/godot-cpp/include/axodox"
             ],
             "defines": [
                 "_DEBUG",

@@ -2,12 +2,13 @@ import os
 env = SConscript('godot-cpp/SConstruct')
 
 env.Append(CPPPATH="src/")
-#env.Append(CPPPATH="godot-cpp/include/libcurl")
+env.Append(CPPPATH="godot-cpp/include/axodox")
 
 #env.Append(LIBPATH="lib")
 #env.Append(LIB="libcurl-x64.dll")
 
 libcurl_dll = 'lib/curl/libcurl.dll'
+dlls = ['lib/curl/libcur.dll']
 
 libcurl_lib_dir = 'lib/curl'
 
@@ -29,7 +30,8 @@ src = Glob("src/*.cpp")
 
 def copy_dll(target, source, env):
     for t in target:
-        env.Install(os.path.dirname(t.abspath), libcurl_dll)
+        for dll in dlls:
+            env.Install(os.path.dirname(t.abspath), dll)
 
 if env['platform'] == 'linux':
     pass

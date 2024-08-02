@@ -11,3 +11,4 @@ export_presets.cfg
 data_*/
 
 gdextension/godot-cpp/bin/libgodot-cpp.windows.template_debug.x86_64.lib
+sd/stable-diffusion.dll

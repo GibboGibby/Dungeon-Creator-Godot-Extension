@@ -239,6 +239,8 @@ void DungeonCreator::_bind_methods()
    ClassDB::bind_method(D_METHOD("generate_tiles", "tilemap"), &DungeonCreator::GenerateTiles);
    ClassDB::bind_method(D_METHOD("generate_tilemap_edge", "tilemap"), &DungeonCreator::AddTilemapEdge);
 
+   ClassDB::bind_method(D_METHOD("RunSDGen", "prompt"), &DungeonCreator::RunSDGen);
+
    ADD_PROPERTY(PropertyInfo(Variant::STRING, "GPTString"), "SetGPTString", "GetGPTString");
    ADD_PROPERTY(PropertyInfo(Variant::STRING, "imageString"), "SetImageString", "GetImageString");
 }
@@ -741,12 +743,37 @@ std::string DungeonCreator::string_insert(std::string toInsert, std::string orig
 {
     pos = pos - 1;
     original.insert(pos, toInsert);
+    return original;
 }
 
 std::string DungeonCreator::string_delete(std::string string, int pos, int amount)
 {
     pos = pos;
     string.erase(pos, amount);
+    return string;
+}
+
+void DungeonCreator::RunSDGen(String prompt)
+{
+    std::string promptStr = prompt.utf8().get_data();
+    std::string systemString = CreateSystemString(promptStr);
+    system(systemString.c_str());
+    system("sd\\sd.exe");
+    UtilityFunctions::print("Generation Finished");
+}
+
+std::string DungeonCreator::CreateSystemString(std::string prompt, int steps, int cfgScale, int seed)
+{
+    std::string sdPath = "sd\\sd.exe";
+    std::string baseFolder = "\"C:\\Users\\james\\Downloads\\downloaded_models\"";
+    std::string dreamshaper = "\"C:\\Users\\james\\Downloads\\downloaded_models\\dreamshaper_8.safetensors\"";
+     
+    std::string finalPrompt = "\"" + prompt + "<lora:faithful32:1>\"";
+    std::string extraParams = "--steps " + std::to_string(steps) + " --cfg-scale " + std::to_string(cfgScale) + " -s " + std::to_string(seed);
+    std::string savedFile = "ai_images/testingcppthing.png";
+
+    std::string systemString = sdPath + " -m " + dreamshaper + " -p " + finalPrompt + " --lora-model-dir " + baseFolder + " " + extraParams + " -o " + savedFile;
+    return systemString;
 }
 
 void DungeonCreator::GenerateTiles(TileMap* tilemap)

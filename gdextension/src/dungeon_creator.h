@@ -13,8 +13,6 @@
 #include <libcurl/curl/curl.h>
 #include <string>
 
-
-
 using namespace godot;
 
 
@@ -82,10 +80,13 @@ class DungeonCreator : public Node2D{
 
    std::string AddObstacles(std::string strTemp, RandomNumberGenerator* rng);
 
+   void RunSDGen(String prompt);
+
 
    private:
    String GPTString = "Empty";
    String imageString = "Empty";
+   std::string CreateSystemString(std::string prompt, int steps = 40, int cfgScale = 7, int seed = -1);
 
    
 

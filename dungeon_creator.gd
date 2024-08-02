@@ -6,6 +6,7 @@ extends DungeonCreator
 func _ready() -> void:
 	generate_tilemap_edge(tile_map)
 	DoAllTheGenerating()
+	
 	#GenAndDownloadImage()
 	#var image_url = create_gpt_image_3("can you generate a 2d side scrolling platformer tilset. It is a 2x3 tileset where: (0,0) is dirt, (1,0) is stone, (2,0) is the outer wall, (0,1) is a ladder, (1,1) is the top of a ladder and (2,1) is empty. With the theme of Hell")
 	#print(image_url)
@@ -28,6 +29,8 @@ func GenAndDownloadImage():
 func _process(delta: float) -> void:
 	if Input.is_action_pressed("NewDungeon"):
 		DoAllTheGenerating()
+	if Input.is_action_pressed("SDGen"):
+		RunSDGen("seamless interesting mossy stone bricks")
 	pass
 
 
