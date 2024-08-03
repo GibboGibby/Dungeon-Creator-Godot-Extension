@@ -31,6 +31,48 @@ func _process(delta: float) -> void:
 		DoAllTheGenerating()
 	if Input.is_action_pressed("SDGen"):
 		RunSDGen("seamless interesting mossy stone bricks")
+		print("finished generating")
+		
+		
+	if Input.is_action_just_pressed("ReloadTileset"):
+		print("testing")
+		
+		print("User data Dir")
+		print(OS.get_user_data_dir())
+		print("Whether file exists or not")
+		print(FileAccess.file_exists("user://combined_tileset.png"))
+		var image = Image.load_from_file("user://combined_tileset.png")
+		var texture = ImageTexture.create_from_image(image)
+		var atlasSource = TileSetAtlasSource.new()
+		atlasSource.texture = texture
+		var tileSize = Vector2i(64,64)
+		atlasSource.texture_region_size = tileSize
+		atlasSource.separation = Vector2i(0,0)
+		atlasSource.margins = Vector2i(0,0)
+		atlasSource.create_tile(Vector2i(0,0))
+		atlasSource.create_tile(Vector2i(0,1))
+		atlasSource.create_tile(Vector2i(1,0))
+		atlasSource.create_tile(Vector2i(1,1))
+		
+		tile_map.tile_set.remove_source(1)
+		tile_map.tile_set.add_source(atlasSource, 1)
+		
+		
+		
+		'''
+		for y in range(texture.get_height() / int(tileSize.y)):
+			for x in range(texture.get_width() / int(tileSize.x)):
+				var tile_id = y * (texture.get_width() / int(tileSize.x)) + x
+				atlasSource.create_tile(tile_id)
+				atlasSource.
+		'''
+		
+		#var tileset = tile_map.tile_set.add_source()
+		
+		#tileset.add_source()
+		
+		#tile_map.tile_set.get_source(1).resource_path = "user://combined_tileset.png"
+		
 	pass
 
 

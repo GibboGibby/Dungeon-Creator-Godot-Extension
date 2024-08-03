@@ -9,9 +9,19 @@
 #include <godot_cpp/classes/file_access.hpp>
 #include <godot_cpp/classes/random_number_generator.hpp>
 #include <godot_cpp/classes/tile_map.hpp>
+#include <godot_cpp/classes/os.hpp>
 #include <map>
 #include <libcurl/curl/curl.h>
 #include <string>
+
+
+#include "opencv2/core.hpp"
+#include "opencv2/imgcodecs.hpp"
+#include "opencv2/highgui.hpp"
+
+#include "opencv2/img_hash/average_hash.hpp"
+#include "opencv2/imgproc/imgproc.hpp"
+
 
 using namespace godot;
 
@@ -40,6 +50,7 @@ class DungeonCreator : public Node2D{
    DungeonLevel level;
 
    std::map<std::string, Vector2i> blocks;
+   std::map<std::string, Vector2i> tiles;
 
    DungeonCreator();
    ~DungeonCreator();
@@ -73,7 +84,7 @@ class DungeonCreator : public Node2D{
    void GenerateTiles(TileMap* tilemap);
    void GenerateChunk(TileMap* tilemap, int x, int y);
    void AddTilemapEdge(TileMap* tilemap);
-   Vector2i GetBlockAtlasPos(RandomNumberGenerator* rng, char type, bool startRoom = false);
+   std::pair<Vector2i, int> GetBlockAtlasPos(RandomNumberGenerator* rng, char type, bool startRoom = false);
 
    std::string string_insert(std::string toInsert, std::string original, int pos);
    std::string string_delete(std::string string, int pos, int amount);
@@ -86,7 +97,7 @@ class DungeonCreator : public Node2D{
    private:
    String GPTString = "Empty";
    String imageString = "Empty";
-   std::string CreateSystemString(std::string prompt, int steps = 40, int cfgScale = 7, int seed = -1);
+   std::string CreateSystemString(std::string prompt, std::string outputFile = "output.png", int steps = 40, int cfgScale = 7, int seed = -1);
 
    
 

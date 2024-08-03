@@ -24,6 +24,13 @@ DungeonCreator::DungeonCreator()
         {"empty", Vector2i(-1,-1)}
     };
     
+    tiles = std::map<std::string, Vector2i>
+    {
+        {"dirt", Vector2i(0,0)},
+        {"stone", Vector2i(1,0)},
+        {"ladder", Vector2i(0,1)},
+        {"ladder_top", Vector2i(1,1)}
+    };
 }
 
 DungeonCreator::~DungeonCreator()
@@ -429,7 +436,7 @@ void DungeonCreator::GenerateDungeon()
     }
 
     Display4x4(level.roomString);
-    
+    memdelete(rng);
 }
 
 void DungeonCreator::Display4x4(int grid[4][4])
@@ -651,6 +658,8 @@ std::string DungeonCreator::GetRoomLayout(int x, int y)
    }
     std::string finalOutput = strTemp;
     finalOutput = AddObstacles(strTemp, rng);
+
+    memdelete(rng);
     return finalOutput;
 }
 
@@ -756,23 +765,68 @@ std::string DungeonCreator::string_delete(std::string string, int pos, int amoun
 void DungeonCreator::RunSDGen(String prompt)
 {
     std::string promptStr = prompt.utf8().get_data();
-    std::string systemString = CreateSystemString(promptStr);
+    std::string systemString = CreateSystemString("seamless interesting red hell dirt", "dirt.png");
     system(systemString.c_str());
-    system("sd\\sd.exe");
-    UtilityFunctions::print("Generation Finished");
+
+    systemString = CreateSystemString("seamless interesting red decayed mossy stone bricks from hell", "stone.png");
+    system(systemString.c_str());
+
+    systemString = CreateSystemString("red/brown ladder from hell with black background", "ladder.png");
+    system(systemString.c_str());
+
+    systemString = CreateSystemString("red/brown ladder top with platform from hell with black background", "ladder_top.png");
+    system(systemString.c_str());
+    
+    
+    // Combine images
+    cv::Mat dirtMat = cv::imread("ai_images/dirt.png");
+    cv::Mat dirtMatResized;
+    cv::resize(dirtMat, dirtMatResized, cv::Size(64, 64), 0,0,cv::INTER_NEAREST);
+    cv::Mat stoneMat = cv::imread("ai_images/stone.png");
+    cv::Mat stoneMatResized;
+    cv::resize(stoneMat, stoneMatResized, cv::Size(64, 64), 0,0,cv::INTER_NEAREST);
+    cv::Mat ladderMat = cv::imread("ai_images/ladder.png");
+    cv::Mat ladderMatResized;
+    cv::resize(ladderMat, ladderMatResized, cv::Size(64, 64), 0,0,cv::INTER_NEAREST);
+    cv::Mat ladderTopMat = cv::imread("ai_images/ladder_top.png");
+    cv::Mat ladderTopMatResized;
+    cv::resize(ladderTopMat, ladderTopMatResized, cv::Size(64, 64), 0,0,cv::INTER_NEAREST);
+
+    cv::Mat top;
+    cv::Mat bottom;
+    cv::Mat final;
+
+    cv::hconcat(dirtMatResized, stoneMatResized, top);
+    cv::hconcat(ladderMatResized, ladderTopMatResized, bottom);
+    cv::vconcat(top, bottom, final);
+
+    
+    
+    String string = OS::get_singleton()->get_user_data_dir();
+    std::string str = string.utf8().get_data();
+
+    cv::imwrite("ai_images/combined_tileset.png", final);
+    cv::imwrite((str + "/combined_tileset.png").c_str(), final);
+    
+
+    //Node* tileMapNode = find_child("TileMap");
+    //TileMap* tilemap = dynamic_cast<TileMap*>(tileMapNode);
+    //tilemap->get_tileset()->get_source(1).;
 }
 
-std::string DungeonCreator::CreateSystemString(std::string prompt, int steps, int cfgScale, int seed)
+std::string DungeonCreator::CreateSystemString(std::string prompt, std::string outputFile, int steps, int cfgScale, int seed)
 {
+    std::string outputFilename = "output.png";
+
     std::string sdPath = "sd\\sd.exe";
     std::string baseFolder = "\"C:\\Users\\james\\Downloads\\downloaded_models\"";
     std::string dreamshaper = "\"C:\\Users\\james\\Downloads\\downloaded_models\\dreamshaper_8.safetensors\"";
      
     std::string finalPrompt = "\"" + prompt + "<lora:faithful32:1>\"";
     std::string extraParams = "--steps " + std::to_string(steps) + " --cfg-scale " + std::to_string(cfgScale) + " -s " + std::to_string(seed);
-    std::string savedFile = "ai_images/testingcppthing.png";
+    std::string savedFile = "ai_images/";
 
-    std::string systemString = sdPath + " -m " + dreamshaper + " -p " + finalPrompt + " --lora-model-dir " + baseFolder + " " + extraParams + " -o " + savedFile;
+    std::string systemString = sdPath + " -m " + dreamshaper + " -p " + finalPrompt + " --lora-model-dir " + baseFolder + " " + extraParams + " -o " + savedFile + outputFile;
     return systemString;
 }
 
@@ -841,14 +895,16 @@ void DungeonCreator::GenerateChunk(TileMap* tilemap, int x, int y)
     {
         for (int j = 0; j < 10; j++)
         {
-            Vector2i atlasPos = GetBlockAtlasPos(rng, levelRows[i][j], isStartRoom);
+            std::pair<Vector2i, int> atlasPosAndID = GetBlockAtlasPos(rng, levelRows[i][j], isStartRoom);
+            Vector2i atlasPos = atlasPosAndID.first;
+            
             if (atlasPos.x == -1 && atlasPos.y == -1)
             {
                 tilemap->erase_cell(0, Vector2i(j,i) + offsetAmount);
             }
             else
             {
-                tilemap->set_cell(0, Vector2i(j,i) + offsetAmount, 0, atlasPos);
+                tilemap->set_cell(0, Vector2i(j,i) + offsetAmount, atlasPosAndID.second, atlasPos);
             }
             /*
             if (levelRows[i][j] == '1')
@@ -876,7 +932,7 @@ void DungeonCreator::GenerateChunk(TileMap* tilemap, int x, int y)
         
     }
 
-
+    memdelete(rng);
 }
 
 // This should set all to a base edge
@@ -895,11 +951,13 @@ void DungeonCreator::AddTilemapEdge(TileMap* tilemap)
 }
  
 // Returns (-1,-1) if the block should not be placed
-Vector2i DungeonCreator::GetBlockAtlasPos(RandomNumberGenerator* rng, char type, bool startRoom)
+std::pair<Vector2i, int> DungeonCreator::GetBlockAtlasPos(RandomNumberGenerator* rng, char type, bool startRoom)
 {
+    int atlasId = 0;
     std::string block = "empty";
     if (type == '1')
     {
+        atlasId = 1;
         if (GibRand(rng, 1, 10) == 1) 
         {
             block = "stone";
@@ -911,6 +969,7 @@ Vector2i DungeonCreator::GetBlockAtlasPos(RandomNumberGenerator* rng, char type,
     }
     else if (type == '2' && GibRand(rng,1,2) == 1)
     {
+        atlasId = 1;
         if (GibRand(rng, 1, 10) == 1) 
         {
             block = "stone";
@@ -922,10 +981,12 @@ Vector2i DungeonCreator::GetBlockAtlasPos(RandomNumberGenerator* rng, char type,
     }
     else if (type == 'L')
     {
+        atlasId = 1;
         block = "ladder";
     }
     else if(type == 'P')
     {
+        atlasId = 1;
         block = "ladder_top";
     }
     else if (type == '9')
@@ -946,6 +1007,12 @@ Vector2i DungeonCreator::GetBlockAtlasPos(RandomNumberGenerator* rng, char type,
     {
         block = "empty";
     }
-    return blocks[block];
+
+    if (atlasId == 1)
+    {
+        return std::make_pair(tiles[block], 1);
+    }
+
+    return std::make_pair(blocks[block], 0);
     //return Vector2i(0,1);
 }

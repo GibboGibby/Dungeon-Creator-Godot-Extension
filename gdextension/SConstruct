@@ -2,19 +2,21 @@ import os
 env = SConscript('godot-cpp/SConstruct')
 
 env.Append(CPPPATH="src/")
-env.Append(CPPPATH="godot-cpp/include/axodox")
 
 #env.Append(LIBPATH="lib")
 #env.Append(LIB="libcurl-x64.dll")
 
 libcurl_dll = 'lib/curl/libcurl.dll'
-dlls = ['lib/curl/libcur.dll']
+opencv_dll = 'lib/opencv/opencv_world480.dll'
+imgHash_dll = 'lib/opencv/opencv_img_hash480.dll'
+dlls = ['lib/curl/libcurl.dll', 'lib/opencv/opencv_world480d.dll']
 
 libcurl_lib_dir = 'lib/curl'
+opencv_lib_dir = 'lib/opencv'
 
-env.Append(LIBPATH=[libcurl_lib_dir])
+env.Append(LIBPATH=[libcurl_lib_dir, opencv_lib_dir])
 
-env.Append(LIBS=['curl'])
+env.Append(LIBS=['curl', 'opencv_world480', 'opencv_img_hash480'])
 
 env.Append(LIBS=[
     'Normaliz.lib',
@@ -30,8 +32,9 @@ src = Glob("src/*.cpp")
 
 def copy_dll(target, source, env):
     for t in target:
-        for dll in dlls:
-            env.Install(os.path.dirname(t.abspath), dll)
+        env.Install(os.path.dirname(t.abspath), libcurl_dll)
+        env.Install(os.path.dirname(t.abspath), opencv_dll)
+        env.Install(os.path.dirname(t.abspath), imgHash_dll)
 
 if env['platform'] == 'linux':
     pass
