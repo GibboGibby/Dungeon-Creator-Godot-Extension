@@ -29,7 +29,13 @@ DungeonCreator::DungeonCreator()
         {"dirt", Vector2i(0,0)},
         {"stone", Vector2i(1,0)},
         {"ladder", Vector2i(0,1)},
-        {"ladder_top", Vector2i(1,1)}
+        {"ladder_top", Vector2i(1,1)},
+        {"exit", Vector2i(2,0)},
+        {"entrance", Vector2i(2,1)},
+        {"spike", Vector2i(1,2)},
+        {"dirt_variant", Vector2i(2,2)},
+        {"wall", Vector2i(0,2)},
+        {"empty", Vector2i(-1,-1)}
     };
 }
 
@@ -234,6 +240,9 @@ void DungeonCreator::_bind_methods()
    ClassDB::bind_method(D_METHOD("GetImageString"), &DungeonCreator::GetImageString);
    ClassDB::bind_method(D_METHOD("SetImageString", "input"), &DungeonCreator::SetImageString);
 
+   ClassDB::bind_method(D_METHOD("GetThemeStrings"), &DungeonCreator::GetThemeStrings);
+   ClassDB::bind_method(D_METHOD("SetThemeStrings", "strings"), &DungeonCreator::SetThemeStrings);
+
    ClassDB::bind_method(D_METHOD("create_gpt_image", "prompt"), &DungeonCreator::GetImageGodotOnly);
    ClassDB::bind_method(D_METHOD("create_gpt_image_3", "prompt"), &DungeonCreator::GetImageGodotOnly3);
 
@@ -247,14 +256,19 @@ void DungeonCreator::_bind_methods()
    ClassDB::bind_method(D_METHOD("generate_tilemap_edge", "tilemap"), &DungeonCreator::AddTilemapEdge);
 
    ClassDB::bind_method(D_METHOD("RunSDGen", "prompt"), &DungeonCreator::RunSDGen);
+   ClassDB::bind_method(D_METHOD("generate_images"), &DungeonCreator::GenerateImages);
+
+   ClassDB::bind_method(D_METHOD("regenerate_tileset_texture"), &DungeonCreator::UpdateTileset);
 
    ADD_PROPERTY(PropertyInfo(Variant::STRING, "GPTString"), "SetGPTString", "GetGPTString");
    ADD_PROPERTY(PropertyInfo(Variant::STRING, "imageString"), "SetImageString", "GetImageString");
+
+   ADD_PROPERTY(PropertyInfo(Variant::PACKED_STRING_ARRAY, "m_Themes"), "SetThemeStrings", "GetThemeStrings");
 }
 
 String DungeonCreator::DownloadFile(const String& url)
 {
-    http_request->connect("request_completed", Callable(this, "_on_request_completed"));
+    http_request->connect("request_completed", Callable(this, "_on_Wherequest_completed"));
     http_request->request(url);
     return String("done");
 }
@@ -307,6 +321,16 @@ String DungeonCreator::GetImageString()
 void DungeonCreator::SetImageString(String input)
 {
     imageString = input;
+}
+
+PackedStringArray DungeonCreator::GetThemeStrings() const
+{
+    return m_Themes;
+}
+
+void DungeonCreator::SetThemeStrings(const PackedStringArray& strings)
+{
+    m_Themes = strings;
 }
 
 void DungeonCreator::GenerateDungeon()
@@ -762,43 +786,122 @@ std::string DungeonCreator::string_delete(std::string string, int pos, int amoun
     return string;
 }
 
+cv::Mat DungeonCreator::GetAndResizeTo64(std::string file)
+{
+    cv::Mat base = cv::imread(file);
+    cv::Mat resized;
+    cv::resize(base, resized, cv::Size(64,64), 0,0,cv::INTER_NEAREST);
+    return resized;
+}
+
+void DungeonCreator::RunGen(std::string prompt, std::string fileName)
+{
+    std::string systemString = CreateSystemString(prompt, fileName);
+    system(systemString.c_str());
+}
+
 void DungeonCreator::RunSDGen(String prompt)
 {
     std::string promptStr = prompt.utf8().get_data();
-    std::string systemString = CreateSystemString("seamless interesting red hell dirt", "dirt.png");
-    system(systemString.c_str());
+    RunGen("seamless interesting red hell dirt", "dirt.png");
 
-    systemString = CreateSystemString("seamless interesting red decayed mossy stone bricks from hell", "stone.png");
-    system(systemString.c_str());
+    RunGen("seamless interesting red decayed mossy stone bricks from hell", "stone.png");
 
-    systemString = CreateSystemString("red/brown ladder from hell with black background", "ladder.png");
-    system(systemString.c_str());
+    RunGen("red/brown ladder from hell with black background", "ladder.png");
 
-    systemString = CreateSystemString("red/brown ladder top with platform from hell with black background", "ladder_top.png");
-    system(systemString.c_str());
+    RunGen("red/brown ladder top with platform from hell with black background", "ladder_top.png");
+
+    RunGen("open door with hellish doorframe", "exit.png");
+    RunGen("closed door with hellish doorframe", "entrance.png");
+    RunGen("seamless hell background wall dark", "outer_wall.png");
+    RunGen("spike with black background", "spike.png");
+    RunGen("seamless interesting red hell dirt", "dirt_variant.png");
     
+    // Tileset structure is as follows:
+    // Dirt, Stone, Exit
+    // Ladder, Ladder Top, Entrance
+    // Outer Wall, Spike, Dirt Variant
+
+    CombineImages();
+    
+
+    //Node* tileMapNode = find_child("TileMap");
+    //TileMap* tilemap = dynamic_cast<TileMap*>(tileMapNode);
+    //tilemap->get_tileset()->get_source(1).;
+}
+
+void DungeonCreator::GenerateImages()
+{
+    // Generate theme: From list or completely random
+    if (m_Themes.size() == 0)
+    {
+        // Pick completely random theme
+    }
+    else if (m_Themes.size() == 1)
+    {
+        // Pick theme adjacent to the theme selected
+    }
+    else
+    {
+        // Pick either one of the themes or a combination
+    }
+
+    // Uses theme to generate the rest
+
+    //Generate dirt
+    // Example dirt gpt string
+    // describe a block texture for a game similar in role to dirt (such as sand, soil, gravel etc) that has a dark gothic theme in around 10 words with the first two being seamless and interesting
+
+}
+
+void DungeonCreator::CombineImages()
+{
+    cv::Mat topMats[3];
+    cv::Mat midMats[3];
+    cv::Mat botMats[3];
     
     // Combine images
-    cv::Mat dirtMat = cv::imread("ai_images/dirt.png");
-    cv::Mat dirtMatResized;
-    cv::resize(dirtMat, dirtMatResized, cv::Size(64, 64), 0,0,cv::INTER_NEAREST);
-    cv::Mat stoneMat = cv::imread("ai_images/stone.png");
-    cv::Mat stoneMatResized;
-    cv::resize(stoneMat, stoneMatResized, cv::Size(64, 64), 0,0,cv::INTER_NEAREST);
-    cv::Mat ladderMat = cv::imread("ai_images/ladder.png");
-    cv::Mat ladderMatResized;
-    cv::resize(ladderMat, ladderMatResized, cv::Size(64, 64), 0,0,cv::INTER_NEAREST);
-    cv::Mat ladderTopMat = cv::imread("ai_images/ladder_top.png");
-    cv::Mat ladderTopMatResized;
-    cv::resize(ladderTopMat, ladderTopMatResized, cv::Size(64, 64), 0,0,cv::INTER_NEAREST);
+    cv::Mat dirt = GetAndResizeTo64("ai_images/dirt.png");
+    cv::Mat stone = GetAndResizeTo64("ai_images/stone.png");
+    cv::Mat ladder = GetAndResizeTo64("ai_images/ladder.png");
+    cv::Mat ladderTop = GetAndResizeTo64("ai_images/ladder_top.png");
+    cv::Mat exit = GetAndResizeTo64("ai_images/exit.png");
+    cv::Mat entrance = GetAndResizeTo64("ai_images/entrance.png");
+    cv::Mat outerWall = GetAndResizeTo64("ai_images/outer_wall.png");
+    cv::Mat spike = GetAndResizeTo64("ai_images/spike.png");
+    cv::Mat dirtVariant = GetAndResizeTo64("ai_images/dirt_variant.png");
+
+    topMats[0] = dirt;
+    topMats[1] = stone;
+    topMats[2] = exit;
+
+    midMats[0] = ladder;
+    midMats[1] = ladderTop;
+    midMats[2] = entrance;
+
+    botMats[0] = outerWall;
+    botMats[1] = spike;
+    botMats[2] = dirtVariant;
 
     cv::Mat top;
+    cv::Mat mid;
     cv::Mat bottom;
     cv::Mat final;
+    cv::Mat verticalMats[3];
 
-    cv::hconcat(dirtMatResized, stoneMatResized, top);
-    cv::hconcat(ladderMatResized, ladderTopMatResized, bottom);
-    cv::vconcat(top, bottom, final);
+    cv::hconcat(&topMats[0], 3, top);
+    cv::hconcat(&midMats[0], 3, mid);
+    cv::hconcat(&botMats[0], 3, bottom);
+
+    verticalMats[0] = top;
+    verticalMats[1] = mid;
+    verticalMats[2] = bottom;
+
+    cv::vconcat(&verticalMats[0], 3, final);
+
+    //cv::hconcat(dirtMatResized, stoneMatResized, top);
+    //cv::hconcat(ladderMatResized, ladderTopMatResized, bottom);
+    //cv::vconcat(top, bottom, final);
 
     
     
@@ -807,11 +910,6 @@ void DungeonCreator::RunSDGen(String prompt)
 
     cv::imwrite("ai_images/combined_tileset.png", final);
     cv::imwrite((str + "/combined_tileset.png").c_str(), final);
-    
-
-    //Node* tileMapNode = find_child("TileMap");
-    //TileMap* tilemap = dynamic_cast<TileMap*>(tileMapNode);
-    //tilemap->get_tileset()->get_source(1).;
 }
 
 std::string DungeonCreator::CreateSystemString(std::string prompt, std::string outputFile, int steps, int cfgScale, int seed)
@@ -898,13 +996,21 @@ void DungeonCreator::GenerateChunk(TileMap* tilemap, int x, int y)
             std::pair<Vector2i, int> atlasPosAndID = GetBlockAtlasPos(rng, levelRows[i][j], isStartRoom);
             Vector2i atlasPos = atlasPosAndID.first;
             
+            
             if (atlasPos.x == -1 && atlasPos.y == -1)
             {
                 tilemap->erase_cell(0, Vector2i(j,i) + offsetAmount);
             }
             else
             {
-                tilemap->set_cell(0, Vector2i(j,i) + offsetAmount, atlasPosAndID.second, atlasPos);
+                if (atlasPos == tiles["ladder"] || atlasPos == tiles["ladder_top"])
+                {
+                    tilemap->set_cell(1,Vector2i(j,i) + offsetAmount, atlasPosAndID.second, atlasPos);
+                }
+                else
+                {
+                    tilemap->set_cell(0, Vector2i(j,i) + offsetAmount, atlasPosAndID.second, atlasPos);
+                }
             }
             /*
             if (levelRows[i][j] == '1')
@@ -935,17 +1041,44 @@ void DungeonCreator::GenerateChunk(TileMap* tilemap, int x, int y)
     memdelete(rng);
 }
 
+void DungeonCreator::UpdateTileset()
+{
+    Ref<Image> image = Image::load_from_file("user://combined_tileset.png");
+    Ref<ImageTexture> texture = ImageTexture::create_from_image(image);
+
+    Ref<TileSetAtlasSource> atlasSource = memnew(TileSetAtlasSource);
+    atlasSource.ptr()->set_texture(texture);
+    atlasSource.ptr()->set_texture_region_size(Vector2i(64,64));
+    atlasSource.ptr()->set_separation(Vector2i(0,0));
+    atlasSource.ptr()->set_margins(Vector2i(0,0));
+
+    for (int i = 0; i < 3; i++)
+    {
+        for (int j = 0; j < 3; j++)
+        {
+            atlasSource.ptr()->create_tile(Vector2i(i,j));
+        }
+    }
+
+    Node* tileMapNode = find_child("TileMap");
+    TileMap* tileMap = dynamic_cast<TileMap*>(tileMapNode);
+    Ref<TileSet> tileSet = tileMap->get_tileset();
+    tileSet.ptr()->remove_source(1);
+    tileSet.ptr()->add_source(atlasSource, 1);
+
+}
+
 // This should set all to a base edge
 // And then in the generation, setting the edges to the correct facing edge
 void DungeonCreator::AddTilemapEdge(TileMap* tilemap)
 {
-    for (int i = -74; i < 75; i += 3)
+    for (int i = -74; i < 75; i += 1)
     {
-        for (int j = -75; j < 74; j += 3)
+        for (int j = -75; j < 74; j += 1)
         {
             Vector2i pos(i,j);
             
-            tilemap->set_cell(0, pos, 0, blocks["wall"]);
+            tilemap->set_cell(0, pos, 1, tiles["wall"]);
         }
     }
 }
@@ -953,7 +1086,7 @@ void DungeonCreator::AddTilemapEdge(TileMap* tilemap)
 // Returns (-1,-1) if the block should not be placed
 std::pair<Vector2i, int> DungeonCreator::GetBlockAtlasPos(RandomNumberGenerator* rng, char type, bool startRoom)
 {
-    int atlasId = 0;
+    int atlasId = 1;
     std::string block = "empty";
     if (type == '1')
     {
@@ -1006,6 +1139,14 @@ std::pair<Vector2i, int> DungeonCreator::GetBlockAtlasPos(RandomNumberGenerator*
     else
     {
         block = "empty";
+    }
+
+    if (block == "dirt")
+    {
+        if (GibRand(rng, 1,10) == 1)
+        {
+            block = "dirt_variant";
+        }
     }
 
     if (atlasId == 1)

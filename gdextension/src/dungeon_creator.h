@@ -6,9 +6,11 @@
 #include <godot_cpp/classes/node2d.hpp>
 #include <godot_cpp/classes/http_request.hpp>
 #include <godot_cpp/classes/image.hpp>
+#include <godot_cpp/classes/image_texture.hpp>
 #include <godot_cpp/classes/file_access.hpp>
 #include <godot_cpp/classes/random_number_generator.hpp>
 #include <godot_cpp/classes/tile_map.hpp>
+#include <godot_cpp/classes/tile_set_atlas_source.hpp>
 #include <godot_cpp/classes/os.hpp>
 #include <map>
 #include <libcurl/curl/curl.h>
@@ -92,13 +94,19 @@ class DungeonCreator : public Node2D{
    std::string AddObstacles(std::string strTemp, RandomNumberGenerator* rng);
 
    void RunSDGen(String prompt);
+   void RunGen(std::string prompt, std::string fileName);
+   void CombineImages();
+   cv::Mat GetAndResizeTo64(std::string file);
 
+   void GenerateImages();
 
+   void UpdateTileset();
    private:
    String GPTString = "Empty";
    String imageString = "Empty";
+   PackedStringArray m_Themes;
    std::string CreateSystemString(std::string prompt, std::string outputFile = "output.png", int steps = 40, int cfgScale = 7, int seed = -1);
-
+   
    
 
    HTTPRequest* http_request;
@@ -106,10 +114,14 @@ class DungeonCreator : public Node2D{
    int NOTIFICATION_POSTINITIALIZE();
 
    public:
+   // Getters and Setters
    String GetGPTString();
    void SetGPTString(String input);
    String GetImageString();
    void SetImageString(String input);
+
+   PackedStringArray GetThemeStrings() const;
+   void SetThemeStrings(const PackedStringArray& strings);
 
    protected:
    static void _bind_methods();

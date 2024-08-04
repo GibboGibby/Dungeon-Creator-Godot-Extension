@@ -1,21 +1,27 @@
 ea4bc82a6ad023ab7ee23ee620429895
-::res://::1722718331
+::res://::1722802805
+BasicMovement.gd::GDScript::-1::1722800986::0::1::::<>Sprite2D<>::
 camera_2d.gd::GDScript::-1::1721254480::0::1::::<>Camera2D<>::
-dungeon_creator.gd::GDScript::-1::1722718292::0::1::::<>DungeonCreator<>::
-dungeon_creator.tscn::PackedScene::8863219031021988630::1722718331::0::1::::<><>::res://dungeon_creator.gd<>uid://ci3nhiuk4dk3i::::res://ai_images/153474.png<>uid://bqfmvfdlgykpc::::res://ai_images/combined_tileset.png
+dungeon_creator.gd::GDScript::-1::1722802652::0::1::::<>DungeonCreator<>::
+dungeon_creator.tscn::PackedScene::8863219031021988630::1722802344::0::1::::<><>::res://dungeon_creator.gd<>uid://bqfmvfdlgykpc::::res://ai_images/combined_tileset.png
 icon.svg::CompressedTexture2D::3656577062029332434::1720305462::1720305467::1::::<><>::
-main.tscn::PackedScene::804293250013548258::1722718331::0::1::::<><>::uid://dyjn6mojhpymw::::res://dungeon_creator.tscn<>res://camera_2d.gd
+main.tscn::PackedScene::804293250013548258::1722802652::0::1::::<><>::uid://dyjn6mojhpymw::::res://dungeon_creator.tscn<>res://camera_2d.gd<>uid://bsdjj4hlodwc5::::res://icon.svg<>res://BasicMovement.gd
 README.md::TextFile::-1::1720881121::0::1::::<><>::
 test.gdextension::GDExtension::-1::1720452653::0::1::::<><>::
-::res://ai_images/::1722717891
+::res://ai_images/::1722788587
 153474.png::CompressedTexture2D::5392956966643561104::1721250163::1721250165::1::::<><>::
 combined_tileset - Copy.png::CompressedTexture2D::8535885194163057115::1722687555::1722689890::1::::<><>::
-combined_tileset.png::CompressedTexture2D::3520530444017045480::1722718383::1722719987::1::::<><>::
-dirt.png::CompressedTexture2D::4927334540881735133::1722718351::1722719987::1::::<><>::
+combined_tileset.png::CompressedTexture2D::3520530444017045480::1722788581::1722788587::1::::<><>::
+dirt.png::CompressedTexture2D::4927334540881735133::1722788482::1722788587::1::::<><>::
+dirt_variant.png::CompressedTexture2D::2684162828980655647::1722788570::1722788587::1::::<><>::
 downloaded_image_skeleton.png::CompressedTexture2D::4382941969247726172::1721664702::1721664706::1::::<><>::
-ladder.png::CompressedTexture2D::6868921242374299727::1722718372::1722719987::1::::<><>::
-ladder_top.png::CompressedTexture2D::6866863725256377762::1722718383::1722719987::1::::<><>::
-stone.png::CompressedTexture2D::3931671527253028244::1722718361::1722719987::1::::<><>::
+entrance.png::CompressedTexture2D::5740208236704701675::1722788536::1722788587::1::::<><>::
+exit.png::CompressedTexture2D::9181545138952573857::1722788526::1722788587::1::::<><>::
+ladder.png::CompressedTexture2D::6868921242374299727::1722788504::1722788587::1::::<><>::
+ladder_top.png::CompressedTexture2D::6866863725256377762::1722788515::1722788587::1::::<><>::
+outer_wall.png::CompressedTexture2D::5323281314628205786::1722788547::1722788587::1::::<><>::
+spike.png::CompressedTexture2D::7558583996549910405::1722788558::1722788587::1::::<><>::
+stone.png::CompressedTexture2D::3931671527253028244::1722788493::1722788587::1::::<><>::
 testingcppthing - Copy.png::CompressedTexture2D::7786133259278139908::1722630283::1722630344::1::::<><>::
 testingcppthing.png::CompressedTexture2D::167734062329648438::1722630536::1722630539::1::::<><>::
 test_tileset.png::CompressedTexture2D::1856945915739868290::1721665858::1721665862::1::::<><>::

@@ -84,7 +84,9 @@
 		"stack": "cpp",
 		"typeindex": "cpp",
 		"unordered_set": "cpp",
-		"variant": "cpp"
+		"variant": "cpp",
+		"complex": "cpp",
+		"fstream": "cpp"
 	},
 	"C_Cpp.errorSquiggles": "disabled"
 }
