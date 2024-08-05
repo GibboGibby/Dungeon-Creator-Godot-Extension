@@ -8,7 +8,7 @@
 [node name="Main" type="Node2D"]
 
 [node name="DungeonCreator" parent="." instance=ExtResource("1_dd6e3")]
-m_Themes = PackedStringArray("Dark Gothic", "Fairy Garden")
+m_Themes = PackedStringArray("Fairy Garden")
 
 [node name="Camera2D" type="Camera2D" parent="."]
 zoom = Vector2(0.5, 0.5)

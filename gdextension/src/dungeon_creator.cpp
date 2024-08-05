@@ -173,7 +173,7 @@ std::string DungeonCreator::GetCompletion(const std::string& prompt, const std::
         requestData["model"] = model;
         requestData["messages"][0]["role"] = "user";
         requestData["messages"][0]["content"] = prompt;
-        requestData["temperature"] = 0;
+        requestData["temperature"] = 1;
 
         std::cout << "Gets past setting request data stuff" << std::endl;
 
@@ -833,25 +833,82 @@ void DungeonCreator::RunSDGen(String prompt)
 void DungeonCreator::GenerateImages()
 {
     // Generate theme: From list or completely random
+    std::string themeString;
     if (m_Themes.size() == 0)
     {
         // Pick completely random theme
+        std::string prompt = "Generate a very broad and simple aesthetic genre for a game level in around 5 words";
+        themeString = GetCompletion(prompt);
     }
     else if (m_Themes.size() == 1)
     {
         // Pick theme adjacent to the theme selected
+        // That or just not pick a new theme?
+        std::string prompt = "Generate a very broad and simple aesthetic genre for a game level in around 5 words that is the same, similar, or adjacent to: " + std::string(m_Themes[0].utf8().get_data());
+        themeString = GetCompletion(prompt);
     }
     else
     {
         // Pick either one of the themes or a combination
+        std::string listOfThemes;
+        for (String str : m_Themes)
+        {
+            listOfThemes += std::string(str.utf8().get_data()) + ", ";
+        }
+        listOfThemes.pop_back();
+        listOfThemes.pop_back();
+        std::string prompt = "Generate a very broad and simple aesthetic genre for a game level in around 3 words not including the world 'level', picking one from this list and either picking something similar or adjacent: " + listOfThemes;
+        UtilityFunctions::print("This is the prompt");
+        UtilityFunctions::print(prompt.c_str());
+        themeString = GetCompletion(prompt);
+        
     }
 
+    UtilityFunctions::print("This is the theme picked");
+    UtilityFunctions::print(themeString.c_str());
     // Uses theme to generate the rest
 
-    //Generate dirt
+
+    // Generate dirt
     // Example dirt gpt string
     // describe a block texture for a game similar in role to dirt (such as sand, soil, gravel etc) that has a dark gothic theme in around 10 words with the first two being seamless and interesting
+    std::string basicDirtString = "describe a block texture for a game similar in role to dirt (such as dirt, sand, soil, gravel etc) with the genre: '" + themeString + "' in around 8 words";
+    std::string dirtOutput = GetCompletion(basicDirtString);
+    
+    // Generate Stone
+    std::string basicStoneString = "describe a block texture for a game similar in role to stone (such as stone, stone bricks, cobblestone, concrete etc) with the genre: '" + themeString + "' in around 8 words";
+    std::string stoneOutput = GetCompletion(basicStoneString);
 
+    std::string exitString = "describe a block texture for a game that is the exit of a level, resembling an open door with the theme: '" + themeString + "' in around 8 words";
+    std::string exitOutput = GetCompletion(exitString);
+
+    std::string ladderString = "describe a block texture for a game that is a ladder with the theme: '" + themeString + "' in around 8 words";
+    std::string ladderOutput = GetCompletion(ladderString);
+    
+    std::string ladderTopString = "describe a block texture for a game that is a ladder with a platform to stand on with the theme: '" + themeString + "' in around 8 words";
+    std::string ladderTopOutput = GetCompletion(ladderTopString);
+    
+    std::string entranceString = "describe a block texture for a game that is the entrance of a level, resembling an closed door with the theme: '" + themeString + "' in around 8 words";
+    std::string entranceOutput = GetCompletion(entranceString);
+    
+    std::string outerWallString = "describe a block texture for a game which is the outer wall, which uses dark colours with the theme: '" + themeString + "' in around 8 words";
+    std::string outerWallOutput = GetCompletion(outerWallString);
+
+    std::string spikeString = "describe the game texture for spikes with the theme: '" + themeString + "' in around 8 words";
+    std::string spikeOutput = GetCompletion(spikeString);
+
+    RunGen(dirtOutput, "dirt.png");
+    RunGen(dirtOutput, "dirt_variant.png");
+
+    RunGen("seamless and interesting " + stoneOutput, "stone.png");
+    RunGen(exitOutput, "exit.png");
+    RunGen(ladderOutput, "ladder.png");
+    RunGen(ladderTopOutput, "ladder_top.png");
+    RunGen(entranceOutput, "entrance.png");
+    RunGen(outerWallOutput, "outer_wall.png");
+    RunGen(spikeOutput, "spike.png");
+
+    CombineImages();
 }
 
 void DungeonCreator::CombineImages()

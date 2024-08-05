@@ -35,6 +35,7 @@ func _process(delta: float) -> void:
 		
 		
 	if Input.is_action_just_pressed("ReloadTileset"):
+		generate_images()
 		regenerate_tileset_texture()
 
 
