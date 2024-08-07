@@ -2,6 +2,8 @@ extends DungeonCreator
 @onready var http_request: HTTPRequest = $HTTPRequest
 @onready var tile_map: TileMap = $TileMap
 
+signal generating_complete(starting_position: Vector2)
+
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
 	generate_tilemap_edge(tile_map)
@@ -14,6 +16,7 @@ func _ready() -> void:
 func DoAllTheGenerating():
 	generate_dungeon()
 	generate_tiles(tile_map)
+	generating_complete.emit(get_starting_room_position())
 
 func GenAndDownloadImage():
 	var hasConnection = has_internet_connection()
@@ -38,8 +41,13 @@ func _process(delta: float) -> void:
 		generate_images()
 		regenerate_tileset_texture()
 
+func remove_tile(pos: Vector2i):
+	tile_map.erase_cell(0, pos)
 
-
+func add_tile(pos: Vector2i):
+	tile_map.set_cell(0, pos, 1, Vector2i(0,0))
+func get_tile(pos: Vector2) -> Vector2:
+	return tile_map.local_to_map(pos)
 
 func _on_request_completed(result: int, response_code: int, headers: PackedStringArray, body: PackedByteArray):
 	print("on_request_completed")

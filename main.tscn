@@ -1,22 +1,33 @@
-[gd_scene load_steps=5 format=3 uid="uid://lpuueyrhkkn7"]
+[gd_scene load_steps=6 format=3 uid="uid://lpuueyrhkkn7"]
 
 [ext_resource type="PackedScene" uid="uid://dyjn6mojhpymw" path="res://dungeon_creator.tscn" id="1_dd6e3"]
 [ext_resource type="Script" path="res://camera_2d.gd" id="2_305vt"]
 [ext_resource type="Texture2D" uid="uid://bsdjj4hlodwc5" path="res://icon.svg" id="3_j6mgv"]
 [ext_resource type="Script" path="res://BasicMovement.gd" id="4_08sgn"]
 
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_m2crq"]
+size = Vector2(50, 50)
+
 [node name="Main" type="Node2D"]
 
 [node name="DungeonCreator" parent="." instance=ExtResource("1_dd6e3")]
-m_Themes = PackedStringArray("Fairy Garden")
+m_Themes = PackedStringArray("fairy garden")
 
-[node name="Camera2D" type="Camera2D" parent="."]
-zoom = Vector2(0.5, 0.5)
+[node name="Camera2D" type="Camera2D" parent="." node_paths=PackedStringArray("player")]
+zoom = Vector2(2, 2)
 script = ExtResource("2_305vt")
 SPEED = 500.0
+player = NodePath("../CharacterBody2D")
 
-[node name="Sprite2D" type="Sprite2D" parent="."]
+[node name="CharacterBody2D" type="CharacterBody2D" parent="." node_paths=PackedStringArray("dungeonCreator")]
+script = ExtResource("4_08sgn")
+dungeonCreator = NodePath("../DungeonCreator")
+
+[node name="Sprite2D" type="Sprite2D" parent="CharacterBody2D"]
 scale = Vector2(0.4, 0.4)
 texture = ExtResource("3_j6mgv")
-script = ExtResource("4_08sgn")
-SPEED = 500.0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="CharacterBody2D"]
+shape = SubResource("RectangleShape2D_m2crq")
+
+[connection signal="generating_complete" from="DungeonCreator" to="CharacterBody2D" method="_on_dungeon_creator_generating_complete"]

@@ -17,8 +17,8 @@ DungeonCreator::DungeonCreator()
         {"dirt", Vector2i(0,1)},
         {"stone", Vector2i(0,0)},
         {"wall", Vector2i(28,19)},
-        {"ladder", Vector2i(2,0)},
-        {"ladder_top", Vector2i(3,0)},
+        {"ladder", Vector2i(0,1)},
+        {"ladder_top", Vector2i(1,1)},
         {"entrance", Vector2i(6,7)},
         {"exit", Vector2i(7,7)},
         {"empty", Vector2i(-1,-1)}
@@ -171,8 +171,10 @@ std::string DungeonCreator::GetCompletion(const std::string& prompt, const std::
         std::cout << "Curl if statement after" << std::endl;
         nlohmann::json requestData;
         requestData["model"] = model;
-        requestData["messages"][0]["role"] = "user";
-        requestData["messages"][0]["content"] = prompt;
+        requestData["messages"][0]["role"] = "system";
+        requestData["messages"][0]["content"] = "You are a dungeon creation assisstant specializing in generating genres/themes and description for tiles in a 2D side-scrolling dungeon game. The genres/themes should be concise, creative and interesting. Consider the following genres: fantasy, medieval, dark, mystical, ancient ruins, steampunk, dark gothic, wasteland, hell, fairy garden. Each tile description should be very generic as the tiles will be used everywhere and will be tiling with eachother. Be creative and ensure the descriptions are cohesive and engaging.";
+        requestData["messages"][1]["role"] = "user";
+        requestData["messages"][1]["content"] = prompt;
         requestData["temperature"] = 1;
 
         std::cout << "Gets past setting request data stuff" << std::endl;
@@ -254,6 +256,8 @@ void DungeonCreator::_bind_methods()
    ClassDB::bind_method(D_METHOD("generate_dungeon"), &DungeonCreator::GenerateDungeon);
    ClassDB::bind_method(D_METHOD("generate_tiles", "tilemap"), &DungeonCreator::GenerateTiles);
    ClassDB::bind_method(D_METHOD("generate_tilemap_edge", "tilemap"), &DungeonCreator::AddTilemapEdge);
+
+   ClassDB::bind_method(D_METHOD("get_starting_room_position"), &DungeonCreator::GetStartingRoomPosition);
 
    ClassDB::bind_method(D_METHOD("RunSDGen", "prompt"), &DungeonCreator::RunSDGen);
    ClassDB::bind_method(D_METHOD("generate_images"), &DungeonCreator::GenerateImages);
@@ -549,13 +553,13 @@ std::string DungeonCreator::GetRoomLayout(int x, int y)
         }
         switch(n)
 	    {
-	        case 1: { strTemp = "00000000006000060000000000000000000000000008000000000000000000000000001111111111"; break; }
-	        case 2: { strTemp = "00000000000000000000000000000000000000000008000000000000000000000000001111111111"; break; }
+	        case 1: { strTemp = "00000000006000060000000000000000000000000008000000000000000000000000001119111111"; break; }
+	        case 2: { strTemp = "00000000000000000000000000000000000000000008000000000000000000000000001111119111"; break; }
 	        case 3: { strTemp = "00000000000010021110001001111000110111129012000000111111111021111111201111111111"; break; }
 	        case 4: { strTemp = "00000000000111200100011110010021111011000000002109011111111102111111121111111111"; break; }
 	        // no drop
-	        case 5: { strTemp = "60000600000000000000000000000000000000000008000000000000000000000000001111111111"; break; }
-	        case 6: { strTemp = "11111111112222222222000000000000000000000008000000000000000000000000001111111111"; break; }
+	        case 5: { strTemp = "60000600000000000000000000000000000000000008000000000000000000000000001111111191"; break; }
+	        case 6: { strTemp = "11111111112222222222000000000000000000000008000000000000000000000000001911111111"; break; }
 	    }
     }
     else if (type == 0)
@@ -872,30 +876,38 @@ void DungeonCreator::GenerateImages()
     // Generate dirt
     // Example dirt gpt string
     // describe a block texture for a game similar in role to dirt (such as sand, soil, gravel etc) that has a dark gothic theme in around 10 words with the first two being seamless and interesting
-    std::string basicDirtString = "describe a block texture for a game similar in role to dirt (such as dirt, sand, soil, gravel etc) with the genre: '" + themeString + "' in around 8 words";
+    std::string basicDirtString = "describe a tile for a 2D side-scroller dungeon game similar in role to dirt (such as dirt, sand, soil, gravel etc) with the genre: '" + themeString + "' in around 7 words";
     std::string dirtOutput = GetCompletion(basicDirtString);
+    UtilityFunctions::print(("dirt output - " + dirtOutput).c_str());
     
     // Generate Stone
-    std::string basicStoneString = "describe a block texture for a game similar in role to stone (such as stone, stone bricks, cobblestone, concrete etc) with the genre: '" + themeString + "' in around 8 words";
+    std::string basicStoneString = "describe a tile for a 2D side-scroller dungeon game similar in role to stone (such as stone, stone bricks, cobblestone, concrete etc) with the genre: '" + themeString + "' in around 7 words";
     std::string stoneOutput = GetCompletion(basicStoneString);
+    UtilityFunctions::print(("stone output - " + stoneOutput).c_str());
 
-    std::string exitString = "describe a block texture for a game that is the exit of a level, resembling an open door with the theme: '" + themeString + "' in around 8 words";
+    std::string exitString = "describe a tile for a 2D side-scroller dungeon game that is the exit of a level, resembling an open door with the theme: '" + themeString + "' in around 7 words";
     std::string exitOutput = GetCompletion(exitString);
+    UtilityFunctions::print(("exit output - " + exitOutput).c_str());
 
-    std::string ladderString = "describe a block texture for a game that is a ladder with the theme: '" + themeString + "' in around 8 words";
+    std::string ladderString = "describe a tile for a 2D side-scroller dungeon game that is a ladder with the theme: '" + themeString + "' in around 7 words";
     std::string ladderOutput = GetCompletion(ladderString);
+    UtilityFunctions::print(("ladder output - " + ladderOutput).c_str());
     
-    std::string ladderTopString = "describe a block texture for a game that is a ladder with a platform to stand on with the theme: '" + themeString + "' in around 8 words";
+    std::string ladderTopString = "describe a tile for a 2D side-scroller dungeon game that is a ladder with a platform to stand on with the theme: '" + themeString + "' in around 7 words";
     std::string ladderTopOutput = GetCompletion(ladderTopString);
+    UtilityFunctions::print(("ladder top output - " + ladderTopOutput).c_str());
     
-    std::string entranceString = "describe a block texture for a game that is the entrance of a level, resembling an closed door with the theme: '" + themeString + "' in around 8 words";
+    std::string entranceString = "describe a tile for a 2D side-scroller dungeon game that is the entrance of a level, resembling an closed door with the theme: '" + themeString + "' in around 7 words";
     std::string entranceOutput = GetCompletion(entranceString);
+    UtilityFunctions::print(("entrance output - " + entranceOutput).c_str());
     
-    std::string outerWallString = "describe a block texture for a game which is the outer wall, which uses dark colours with the theme: '" + themeString + "' in around 8 words";
+    std::string outerWallString = "describe a tile for a 2D side-scroller dungeon game which is the outer wall, which uses dark colours with the theme: '" + themeString + "' in around 7 words";
     std::string outerWallOutput = GetCompletion(outerWallString);
+    UtilityFunctions::print(("outer wall output - " + outerWallOutput).c_str());
 
-    std::string spikeString = "describe the game texture for spikes with the theme: '" + themeString + "' in around 8 words";
+    std::string spikeString = "describe the tile for a 2D side-scroller dungeon game spikes with the theme: '" + themeString + "' in around 8 words";
     std::string spikeOutput = GetCompletion(spikeString);
+    UtilityFunctions::print(("spike output - " + spikeOutput).c_str());
 
     RunGen(dirtOutput, "dirt.png");
     RunGen(dirtOutput, "dirt_variant.png");
@@ -909,6 +921,11 @@ void DungeonCreator::GenerateImages()
     RunGen(spikeOutput, "spike.png");
 
     CombineImages();
+}
+
+Vector2i DungeonCreator::GetStartingRoomPosition()
+{
+    return level.startingPosition;
 }
 
 void DungeonCreator::CombineImages()
@@ -1060,14 +1077,17 @@ void DungeonCreator::GenerateChunk(TileMap* tilemap, int x, int y)
             }
             else
             {
+                tilemap->set_cell(0, Vector2i(j,i) + offsetAmount, atlasPosAndID.second, atlasPos);
+                /*
                 if (atlasPos == tiles["ladder"] || atlasPos == tiles["ladder_top"])
                 {
-                    tilemap->set_cell(1,Vector2i(j,i) + offsetAmount, atlasPosAndID.second, atlasPos);
+                    //tilemap->set_cell(1,Vector2i(j,i) + offsetAmount, atlasPosAndID.second, atlasPos);
                 }
                 else
                 {
                     tilemap->set_cell(0, Vector2i(j,i) + offsetAmount, atlasPosAndID.second, atlasPos);
                 }
+                */
             }
             /*
             if (levelRows[i][j] == '1')
@@ -1102,6 +1122,7 @@ void DungeonCreator::UpdateTileset()
 {
     Ref<Image> image = Image::load_from_file("user://combined_tileset.png");
     Ref<ImageTexture> texture = ImageTexture::create_from_image(image);
+    /*
 
     Ref<TileSetAtlasSource> atlasSource = memnew(TileSetAtlasSource);
     atlasSource.ptr()->set_texture(texture);
@@ -1116,12 +1137,17 @@ void DungeonCreator::UpdateTileset()
             atlasSource.ptr()->create_tile(Vector2i(i,j));
         }
     }
+    */
 
     Node* tileMapNode = find_child("TileMap");
     TileMap* tileMap = dynamic_cast<TileMap*>(tileMapNode);
     Ref<TileSet> tileSet = tileMap->get_tileset();
-    tileSet.ptr()->remove_source(1);
-    tileSet.ptr()->add_source(atlasSource, 1);
+
+    dynamic_cast<TileSetAtlasSource*>(tileSet.ptr()->get_source(1).ptr())->set_texture(texture);
+
+    //tileSet.ptr()->remove_source(1);
+    //tileSet.ptr()->add_source(atlasSource, 1);
+    
 
 }
 

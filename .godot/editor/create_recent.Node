@@ -1,5 +1,8 @@
-DungeonCreator
+Node2D
 Sprite2D
+CollisionShape2D
+CharacterBody2D
+DungeonCreator
 Camera2D
 TileMap
 HTTPRequest

@@ -11,6 +11,8 @@
 #include <godot_cpp/classes/random_number_generator.hpp>
 #include <godot_cpp/classes/tile_map.hpp>
 #include <godot_cpp/classes/tile_set_atlas_source.hpp>
+#include <godot_cpp/classes/collision_shape2d.hpp>
+#include <godot_cpp/classes/rectangle_shape2d.hpp>
 #include <godot_cpp/classes/os.hpp>
 #include <map>
 #include <libcurl/curl/curl.h>
@@ -119,6 +121,8 @@ class DungeonCreator : public Node2D{
    void SetGPTString(String input);
    String GetImageString();
    void SetImageString(String input);
+
+   Vector2i GetStartingRoomPosition();
 
    PackedStringArray GetThemeStrings() const;
    void SetThemeStrings(const PackedStringArray& strings);
