@@ -1,6 +1,7 @@
-[gd_scene load_steps=5 format=3 uid="uid://dyjn6mojhpymw"]
+[gd_scene load_steps=6 format=3 uid="uid://dyjn6mojhpymw"]
 
 [ext_resource type="Script" path="res://dungeon_creator.gd" id="1_ki5sn"]
+[ext_resource type="Texture2D" uid="uid://cr7a0yh6p3bv6" path="res://output.png" id="3_h4faj"]
 [ext_resource type="Texture2D" uid="uid://bqfmvfdlgykpc" path="res://ai_images/combined_tileset.png" id="3_kn475"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_bthoi"]
@@ -33,7 +34,6 @@ physics_layer_1/collision_mask = 0
 sources/1 = SubResource("TileSetAtlasSource_bthoi")
 
 [node name="DungeonCreator" type="DungeonCreator"]
-m_Themes = PackedStringArray("")
 script = ExtResource("1_ki5sn")
 
 [node name="HTTPRequest" type="HTTPRequest" parent="."]
@@ -42,5 +42,11 @@ script = ExtResource("1_ki5sn")
 texture_filter = 1
 tile_set = SubResource("TileSet_sogxe")
 format = 2
+
+[node name="Background" type="Sprite2D" parent="."]
+z_index = -1
+position = Vector2(1269, -266)
+scale = Vector2(2.55078, 2.55078)
+texture = ExtResource("3_h4faj")
 
 [connection signal="request_completed" from="HTTPRequest" to="." method="_on_request_completed"]

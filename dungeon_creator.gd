@@ -2,11 +2,14 @@ extends DungeonCreator
 @onready var http_request: HTTPRequest = $HTTPRequest
 @onready var tile_map: TileMap = $TileMap
 
+var shouldRefresh := false
+
 signal generating_complete(starting_position: Vector2)
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
 	generate_tilemap_edge(tile_map)
+	regenerate_tileset_texture()
 	DoAllTheGenerating()
 	
 	#GenAndDownloadImage()
@@ -30,6 +33,10 @@ func GenAndDownloadImage():
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
+	if shouldRefresh:
+		regenerate_tileset_texture()
+		shouldRefresh = false
+	
 	if Input.is_action_pressed("NewDungeon"):
 		DoAllTheGenerating()
 	if Input.is_action_pressed("SDGen"):
@@ -51,14 +58,19 @@ func get_tile(pos: Vector2) -> Vector2:
 
 func _on_request_completed(result: int, response_code: int, headers: PackedStringArray, body: PackedByteArray):
 	print("on_request_completed")
-	var i = 1
-	var baseFileLocation = "res://ai_images/test_tileset.png"
-	while (FileAccess.file_exists(baseFileLocation)):
-		baseFileLocation = "res://ai_images/test_tileset_" + str(i) + ".png"
-		
-		
-	var file = FileAccess.open(baseFileLocation, FileAccess.WRITE)
+	var file = FileAccess.open("user://background_image.png", FileAccess.WRITE)
 	file.store_buffer(body)
 	file.close()
+	#var i = 1
+	#var baseFileLocation = "res://ai_images/test_tileset.png"
+	#while (FileAccess.file_exists(baseFileLocation)):
+	#	baseFileLocation = "res://ai_images/test_tileset_" + str(i) + ".png"
+		
+		
+	#var file = FileAccess.open(baseFileLocation, FileAccess.WRITE)
+	#file.store_buffer(body)
+	#file.close()
 	print("finished on_request_completed")
+	shouldRefresh = true
+	#regenerate_tileset_texture()
 	

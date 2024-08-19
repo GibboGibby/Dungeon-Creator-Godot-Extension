@@ -13,6 +13,7 @@
 #include <godot_cpp/classes/tile_set_atlas_source.hpp>
 #include <godot_cpp/classes/collision_shape2d.hpp>
 #include <godot_cpp/classes/rectangle_shape2d.hpp>
+#include <godot_cpp/classes/sprite2d.hpp>
 #include <godot_cpp/classes/os.hpp>
 #include <map>
 #include <libcurl/curl/curl.h>
@@ -107,7 +108,7 @@ class DungeonCreator : public Node2D{
    String GPTString = "Empty";
    String imageString = "Empty";
    PackedStringArray m_Themes;
-   std::string CreateSystemString(std::string prompt, std::string outputFile = "output.png", int steps = 40, int cfgScale = 7, int seed = -1);
+   std::string CreateSystemString(std::string prompt, std::string outputFile = "output.png", int steps = 40, int cfgScale = 7, int seed = -1, bool includeFaithful = true);
    
    
 

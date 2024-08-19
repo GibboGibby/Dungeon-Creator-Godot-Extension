@@ -93,11 +93,11 @@ std::string DungeonCreator::GetImage(const std::string& prompt, const std::strin
     headers = curl_slist_append(headers, ("Authorization: Bearer " + apiKey).c_str());
     headers = curl_slist_append(headers, "Content-Type: application/json");
 
-    nlohmann::json jsonData;
     UtilityFunctions::print(("generating image using " + model + " model").c_str());
+    nlohmann::json jsonData;
     jsonData["model"] = model;
     jsonData["prompt"] = prompt;
-    jsonData["size"] = "256x256";
+    jsonData["size"] = "1024x1024";
     jsonData["n"] = 1;
     //jsonData["size"] = "1024x1024";
 
@@ -159,28 +159,34 @@ String DungeonCreator::gpt_image()
 }
 
 
+std::string apiKey = "sk-proj-QP7gwmynJNQGPhWlwXCXT3BlbkFJz0ridvHNwxDLxobZy5pZ";
 std::string DungeonCreator::GetCompletion(const std::string& prompt, const std::string& model)
 {
-    std::string apiKey = "sk-proj-QP7gwmynJNQGPhWlwXCXT3BlbkFJz0ridvHNwxDLxobZy5pZ";
+    // URL and string to store response in
     std::string baseUrl = "https://api.openai.com/v1/chat/completions";
     std::string response;
+    // Initialise curl
     CURL* curl = curl_easy_init();
-
+    // If successful initalisation
     if (curl) {
-        //UtilityFunctions::print("Curl if statement after");
-        std::cout << "Curl if statement after" << std::endl;
+        
+
         nlohmann::json requestData;
         requestData["model"] = model;
+        // Custom role (For better responses)
         requestData["messages"][0]["role"] = "system";
-        requestData["messages"][0]["content"] = "You are a dungeon creation assisstant specializing in generating genres/themes and description for tiles in a 2D side-scrolling dungeon game. The genres/themes should be concise, creative and interesting. Consider the following genres: fantasy, medieval, dark, mystical, ancient ruins, steampunk, dark gothic, wasteland, hell, fairy garden. Each tile description should be very generic as the tiles will be used everywhere and will be tiling with eachother. Be creative and ensure the descriptions are cohesive and engaging.";
+        requestData["messages"][0]["content"] = "You are a dungeon creation assisstant specializing in generating genres/themes"
+        " and description for tiles in a 2D side-scrolling dungeon game. The genres/themes should be concise, creative and interesting. "
+        "Consider the following genres: fantasy, medieval, dark, mystical, ancient ruins, steampunk, dark gothic, wasteland, hell, fairy"
+        " garden. Each tile description should be very generic as the tiles will be used everywhere and will be tiling with eachother."
+        " Be creative and ensure the descriptions are cohesive and engaging.";
         requestData["messages"][1]["role"] = "user";
         requestData["messages"][1]["content"] = prompt;
+        // How deterministic the response is
         requestData["temperature"] = 1;
 
-        std::cout << "Gets past setting request data stuff" << std::endl;
-
         std::string requestDataStr = requestData.dump().c_str();
-
+        // Create struct for sending data
         struct curl_slist* headers = NULL;
         headers = curl_slist_append(headers, "Content-Type: application/json");
         headers = curl_slist_append(headers, ("Authorization: Bearer " + apiKey).c_str());
@@ -190,21 +196,20 @@ std::string DungeonCreator::GetCompletion(const std::string& prompt, const std::
         curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &DungeonCreator::WriteCallback);
         curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response);
+        // Perform curl request
         CURLcode res = curl_easy_perform(curl);
 
-        //UtilityFunctions::print("Gets past easy perform");d 
-        std::cout << "Gets past easy perform" << std::endl;
         if (res != CURLE_OK)
         {
-            //UtilityFunctions::print("Cerr is happening");
+            // If failed
             std::cout << "Cerr is happening" << std::endl;
             std::cerr << "Curl request failed: " << curl_easy_strerror(res) << std::endl;
         }
-
+        // Cleanup curl
         curl_easy_cleanup(curl);
         curl_slist_free_all(headers);
     }
-
+    // Parse response as json and return it to the caller
     nlohmann::json jresponse = nlohmann::json::parse(response);
     return jresponse["choices"][0]["message"]["content"].get<std::string>();
 }
@@ -272,8 +277,12 @@ void DungeonCreator::_bind_methods()
 
 String DungeonCreator::DownloadFile(const String& url)
 {
-    http_request->connect("request_completed", Callable(this, "_on_Wherequest_completed"));
-    http_request->request(url);
+    Node* nodePtr = find_child("HTTPRequest");
+    HTTPRequest* httpRequest = dynamic_cast<HTTPRequest*>(nodePtr);
+    httpRequest->request(url);
+    //DownloadFileRequest(url, httpRequest);
+    //http_request->connect("request_completed", Callable(this, "_on_request_completed"));
+    //http_request->request(url);
     return String("done");
 }
 
@@ -300,7 +309,7 @@ void DungeonCreator::_on_request_completed(int result, int response_code, Packed
         //Ref<ImageTexture> texture = memnew(ImageTexture);
         //texture->create_from_image(image);
 
-        Ref<FileAccess> file = FileAccess::open("res://downloaded_image.png", FileAccess::WRITE);
+        Ref<FileAccess> file = FileAccess::open("res://background_image.png", FileAccess::WRITE);
         file->store_buffer(body);
         file->close();
     }
@@ -343,9 +352,8 @@ void DungeonCreator::GenerateDungeon()
     int rooms[4][4];
     memset(rooms, 0, sizeof(int) * 4 * 4);
 
-    UtilityFunctions::print("After memset");
+    // Create memory for Godots RandomNumberGenerator
     RandomNumberGenerator* rng = memnew(RandomNumberGenerator);
-    UtilityFunctions::print("After rng");
     // Pick room to be starting room
     int startingX = rng->randi_range(0,3);
     Vector2i startingPos(startingX,3);
@@ -361,9 +369,9 @@ void DungeonCreator::GenerateDungeon()
         
         int direction = 0; // 1 - left, 2 - right, 3 - down
         // Set room type
+        // 1-3 left, 4-6 right, 7 down
         int whereToGoNext = rng->randi_range(1,7);
-        UtilityFunctions::print("current position - ", currentPos);
-        UtilityFunctions::print(whereToGoNext);
+        // Check if the last room was 2 and place respective base room
         if (lastRoom == 1)
         {
             rooms[currentPos.y][currentPos.x] = 1;
@@ -372,6 +380,7 @@ void DungeonCreator::GenerateDungeon()
         {
             rooms[currentPos.y][currentPos.x] = 2;
         }
+        // Set direction
         if (whereToGoNext == 1 || whereToGoNext == 2 || whereToGoNext == 3)
         {
             // Go Left
@@ -382,13 +391,13 @@ void DungeonCreator::GenerateDungeon()
             }
             else
             {
-                direction = 1;
+                direction = 2;
             }
         }
         else if (whereToGoNext == 4 || whereToGoNext == 5 || whereToGoNext == 6)
         {
             // Go right
-            // Check if hitting wall
+            // Check if hitting wall go down 
             if (currentPos.x == 3)
             {
                 direction = 3;
@@ -404,7 +413,7 @@ void DungeonCreator::GenerateDungeon()
             // Go down
             direction = 3;
         }
-
+        // If last room is 2 then set this room to 3
         if (lastRoom == 2)
         {
             if (direction == 1 || direction == 2)
@@ -414,6 +423,7 @@ void DungeonCreator::GenerateDungeon()
         }
         switch (direction)
         {
+        // If left and right room number is already set and just needs to restart the loop changing the x coordinate
         case 1:
             currentPos.x -= 1;
             lastRoom = 1;
@@ -423,6 +433,7 @@ void DungeonCreator::GenerateDungeon()
             lastRoom = 1;
             break;
         case 3:
+        // If going down check if exit room
             if (currentPos.y == 0)
             {
                 // Place Exit Room
@@ -438,6 +449,7 @@ void DungeonCreator::GenerateDungeon()
                 generating = false;
                 break;
             }
+            // If no exit room set current room and move y coordinate down
             rooms[currentPos.y][currentPos.x] = 2;
             currentPos.y -= 1;
             lastRoom = 2;
@@ -447,23 +459,20 @@ void DungeonCreator::GenerateDungeon()
         }
     }
 
-
-    UtilityFunctions::print("Finished Generating");
-    UtilityFunctions::print("Starting room is at - ", startingPos);
-    UtilityFunctions::print("Ending room is at - ", exitRoom);
-    Display4x4(rooms);
+    // Set class member values so the exit and start room can be accessed throughout the program
     level.endingPosition = exitRoom;
     level.startingPosition = startingPos;
+    // Loop through the level information and set the member values
     for (int y = 0; y < 4; y++)
     {
         for (int x = 0; x < 4; x++)
         {
             level.roomLayout[y][x] = rooms[y][x];
+            // Get room layout and store globally
             level.roomString[y][x] = GetRoomLayout(x,y);
         }
     }
-
-    Display4x4(level.roomString);
+    // Free created memory so no memory leaks
     memdelete(rng);
 }
 
@@ -778,7 +787,7 @@ std::string DungeonCreator::AddObstacles(std::string strTemp, RandomNumberGenera
 
 std::string DungeonCreator::string_insert(std::string toInsert, std::string original, int pos)
 {
-    pos = pos - 1;
+    pos = pos;
     original.insert(pos, toInsert);
     return original;
 }
@@ -921,6 +930,10 @@ void DungeonCreator::GenerateImages()
     RunGen(spikeOutput, "spike.png");
 
     CombineImages();
+
+    std::string backgroundPrompt = "generate a background for a 2D side-scroller dungeon game with the theme: '" + themeString + "'";
+    DownloadFile(GetImageGodotOnly3(String(backgroundPrompt.c_str())));
+    
 }
 
 Vector2i DungeonCreator::GetStartingRoomPosition()
@@ -986,15 +999,21 @@ void DungeonCreator::CombineImages()
     cv::imwrite((str + "/combined_tileset.png").c_str(), final);
 }
 
-std::string DungeonCreator::CreateSystemString(std::string prompt, std::string outputFile, int steps, int cfgScale, int seed)
+//std::string baseFolder = "\"C:\\Users\\james\\Downloads\\downloaded_models\"";
+//std::string dreamshaper = "\"C:\\Users\\james\\Downloads\\downloaded_models\\dreamshaper_8.safetensors\"";
+std::string DungeonCreator::CreateSystemString(std::string prompt, std::string outputFile, int steps, int cfgScale, int seed, bool includeFaithful)
 {
     std::string outputFilename = "output.png";
 
     std::string sdPath = "sd\\sd.exe";
-    std::string baseFolder = "\"C:\\Users\\james\\Downloads\\downloaded_models\"";
-    std::string dreamshaper = "\"C:\\Users\\james\\Downloads\\downloaded_models\\dreamshaper_8.safetensors\"";
-     
-    std::string finalPrompt = "\"" + prompt + "<lora:faithful32:1>\"";
+    std::string baseFolder = "\"models\"";
+    std::string dreamshaper = "\"models\\dreamshaper_8.safetensors\"";
+    std::string finalPrompt;
+    if (includeFaithful)
+        finalPrompt = "\"" + prompt + "<lora:faithful32:1>\"";
+    else
+        finalPrompt = "\"" + prompt + "\"";
+    
     std::string extraParams = "--steps " + std::to_string(steps) + " --cfg-scale " + std::to_string(cfgScale) + " -s " + std::to_string(seed);
     std::string savedFile = "ai_images/";
 
@@ -1144,6 +1163,17 @@ void DungeonCreator::UpdateTileset()
     Ref<TileSet> tileSet = tileMap->get_tileset();
 
     dynamic_cast<TileSetAtlasSource*>(tileSet.ptr()->get_source(1).ptr())->set_texture(texture);
+
+
+    Node* nodePtr = find_child("Background");
+    Sprite2D* background = dynamic_cast<Sprite2D*>(nodePtr);
+
+    
+
+    Ref<Image> background_image = Image::load_from_file("user://background_image.png");
+    Ref<ImageTexture> background_texture = ImageTexture::create_from_image(background_image);
+
+    background->set_texture(background_texture);
 
     //tileSet.ptr()->remove_source(1);
     //tileSet.ptr()->add_source(atlasSource, 1);
