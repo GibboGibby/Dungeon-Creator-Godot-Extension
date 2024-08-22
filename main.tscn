@@ -1,4 +1,4 @@
-[gd_scene load_steps=6 format=3 uid="uid://lpuueyrhkkn7"]
+[gd_scene load_steps=7 format=3 uid="uid://lpuueyrhkkn7"]
 
 [ext_resource type="PackedScene" uid="uid://dyjn6mojhpymw" path="res://dungeon_creator.tscn" id="1_dd6e3"]
 [ext_resource type="Script" path="res://camera_2d.gd" id="2_305vt"]
@@ -7,6 +7,9 @@
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_m2crq"]
 size = Vector2(50, 50)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_eeo7p"]
+size = Vector2(42, 43)
 
 [node name="Main" type="Node2D"]
 
@@ -30,4 +33,13 @@ texture = ExtResource("3_j6mgv")
 [node name="CollisionShape2D" type="CollisionShape2D" parent="CharacterBody2D"]
 shape = SubResource("RectangleShape2D_m2crq")
 
+[node name="Area2D" type="Area2D" parent="CharacterBody2D"]
+collision_layer = 4
+collision_mask = 4
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="CharacterBody2D/Area2D"]
+position = Vector2(0, -0.5)
+shape = SubResource("RectangleShape2D_eeo7p")
+
 [connection signal="generating_complete" from="DungeonCreator" to="CharacterBody2D" method="_on_dungeon_creator_generating_complete"]
+[connection signal="body_entered" from="CharacterBody2D/Area2D" to="CharacterBody2D" method="_on_area_2d_body_entered"]

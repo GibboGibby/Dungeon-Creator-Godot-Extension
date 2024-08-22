@@ -1,3 +1,4 @@
-res://main.tscn
-res://dungeon_creator.gd
 res://dungeon_creator.tscn
+res://dungeon_creator.gd
+res://BasicMovement.gd
+res://main.tscn

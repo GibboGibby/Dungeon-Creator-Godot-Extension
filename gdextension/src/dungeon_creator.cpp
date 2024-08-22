@@ -813,6 +813,26 @@ void DungeonCreator::RunGen(std::string prompt, std::string fileName)
     system(systemString.c_str());
 }
 
+std::string DungeonCreator::CreateSystemString(std::string prompt, std::string outputFile, int steps, int cfgScale, int seed, bool includeFaithful)
+{
+    std::string outputFilename = "output.png";
+
+    std::string sdPath = "sd\\sd.exe";
+    std::string baseFolder = "\"models\"";
+    std::string dreamshaper = "\"C:\\Users\\james\\Downloads\\downloaded_models\\dreamshaper_8.safetensors\"";
+    std::string finalPrompt;
+    if (includeFaithful)
+        finalPrompt = "\"" + prompt + "<lora:faithful32:1>\"";
+    else
+        finalPrompt = "\"" + prompt + "\"";
+    
+    std::string extraParams = "--steps " + std::to_string(steps) + " --cfg-scale " + std::to_string(cfgScale) + " -s " + std::to_string(seed);
+    std::string savedFile = "ai_images/";
+
+    std::string systemString = sdPath + " -m " + dreamshaper + " -p " + finalPrompt + " --lora-model-dir " + baseFolder + " " + extraParams + " -o " + savedFile + outputFile;
+    return systemString;
+}
+
 void DungeonCreator::RunSDGen(String prompt)
 {
     std::string promptStr = prompt.utf8().get_data();
@@ -918,15 +938,15 @@ void DungeonCreator::GenerateImages()
     std::string spikeOutput = GetCompletion(spikeString);
     UtilityFunctions::print(("spike output - " + spikeOutput).c_str());
 
-    RunGen(dirtOutput, "dirt.png");
-    RunGen(dirtOutput, "dirt_variant.png");
+    RunGen("seamless and interesting " + dirtOutput, "dirt.png");
+    RunGen("seamless and interesting " + dirtOutput, "dirt_variant.png");
 
     RunGen("seamless and interesting " + stoneOutput, "stone.png");
     RunGen(exitOutput, "exit.png");
     RunGen(ladderOutput, "ladder.png");
     RunGen(ladderTopOutput, "ladder_top.png");
     RunGen(entranceOutput, "entrance.png");
-    RunGen(outerWallOutput, "outer_wall.png");
+    RunGen("seamless and interesting " + outerWallOutput, "outer_wall.png");
     RunGen(spikeOutput, "spike.png");
 
     CombineImages();
@@ -1001,25 +1021,7 @@ void DungeonCreator::CombineImages()
 
 //std::string baseFolder = "\"C:\\Users\\james\\Downloads\\downloaded_models\"";
 //std::string dreamshaper = "\"C:\\Users\\james\\Downloads\\downloaded_models\\dreamshaper_8.safetensors\"";
-std::string DungeonCreator::CreateSystemString(std::string prompt, std::string outputFile, int steps, int cfgScale, int seed, bool includeFaithful)
-{
-    std::string outputFilename = "output.png";
 
-    std::string sdPath = "sd\\sd.exe";
-    std::string baseFolder = "\"models\"";
-    std::string dreamshaper = "\"models\\dreamshaper_8.safetensors\"";
-    std::string finalPrompt;
-    if (includeFaithful)
-        finalPrompt = "\"" + prompt + "<lora:faithful32:1>\"";
-    else
-        finalPrompt = "\"" + prompt + "\"";
-    
-    std::string extraParams = "--steps " + std::to_string(steps) + " --cfg-scale " + std::to_string(cfgScale) + " -s " + std::to_string(seed);
-    std::string savedFile = "ai_images/";
-
-    std::string systemString = sdPath + " -m " + dreamshaper + " -p " + finalPrompt + " --lora-model-dir " + baseFolder + " " + extraParams + " -o " + savedFile + outputFile;
-    return systemString;
-}
 
 void DungeonCreator::GenerateTiles(TileMap* tilemap)
 {

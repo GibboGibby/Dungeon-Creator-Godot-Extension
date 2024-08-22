@@ -62,3 +62,13 @@ func _process(delta: float) -> void:
 			newTile = tile + Vector2(1,0)
 		if (tile != newTile):
 			dungeonCreator.add_tile(newTile)
+
+
+func _on_area_2d_body_entered(body: Node2D) -> void:
+	# Called when the player touches the end
+	# From here just gen a new level and reset the player
+	print("area2d touching something")
+	dungeonCreator.DoAllTheGenerating()
+	dungeonCreator.generate_images()
+	dungeonCreator.regenerate_tileset_texture()
+	pass # Replace with function body.

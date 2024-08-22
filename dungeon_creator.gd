@@ -47,6 +47,8 @@ func _process(delta: float) -> void:
 	if Input.is_action_just_pressed("ReloadTileset"):
 		generate_images()
 		regenerate_tileset_texture()
+		
+	
 
 func remove_tile(pos: Vector2i):
 	tile_map.erase_cell(0, pos)
