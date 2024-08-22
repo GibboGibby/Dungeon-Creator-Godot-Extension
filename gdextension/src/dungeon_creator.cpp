@@ -813,6 +813,12 @@ void DungeonCreator::RunGen(std::string prompt, std::string fileName)
     system(systemString.c_str());
 }
 
+void DungeonCreator::CreateBackground(std::string prompt, std::string fileName)
+{
+    std::string systemString = CreateSystemString(prompt, fileName, 40, 7, -1, false);
+    system(systemString.c_str());
+}
+
 std::string DungeonCreator::CreateSystemString(std::string prompt, std::string outputFile, int steps, int cfgScale, int seed, bool includeFaithful)
 {
     std::string outputFilename = "output.png";
@@ -828,6 +834,15 @@ std::string DungeonCreator::CreateSystemString(std::string prompt, std::string o
     
     std::string extraParams = "--steps " + std::to_string(steps) + " --cfg-scale " + std::to_string(cfgScale) + " -s " + std::to_string(seed);
     std::string savedFile = "ai_images/";
+
+    String userDirBad = OS::get_singleton()->get_user_data_dir();
+    std::string userDir = userDirBad.utf8().get_data();
+    if (userDir.back() != "/")
+    {
+        userDir.append("/");
+    }
+    
+    // savedFile = userDir;
 
     std::string systemString = sdPath + " -m " + dreamshaper + " -p " + finalPrompt + " --lora-model-dir " + baseFolder + " " + extraParams + " -o " + savedFile + outputFile;
     return systemString;
@@ -1141,8 +1156,7 @@ void DungeonCreator::GenerateChunk(TileMap* tilemap, int x, int y)
 
 void DungeonCreator::UpdateTileset()
 {
-    Ref<Image> image = Image::load_from_file("user://combined_tileset.png");
-    Ref<ImageTexture> texture = ImageTexture::create_from_image(image);
+    
     /*
 
     Ref<TileSetAtlasSource> atlasSource = memnew(TileSetAtlasSource);
@@ -1159,11 +1173,11 @@ void DungeonCreator::UpdateTileset()
         }
     }
     */
-
+    Ref<Image> image = Image::load_from_file("user://combined_tileset.png");
+    Ref<ImageTexture> texture = ImageTexture::create_from_image(image);
     Node* tileMapNode = find_child("TileMap");
     TileMap* tileMap = dynamic_cast<TileMap*>(tileMapNode);
     Ref<TileSet> tileSet = tileMap->get_tileset();
-
     dynamic_cast<TileSetAtlasSource*>(tileSet.ptr()->get_source(1).ptr())->set_texture(texture);
 
 

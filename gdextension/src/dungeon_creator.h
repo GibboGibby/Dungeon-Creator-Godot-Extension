@@ -49,7 +49,12 @@ struct DungeonLevel
 class DungeonCreator : public Node2D{
    GDCLASS(DungeonCreator, Node2D);
 
-   
+   private:
+
+   std::string string_insert(std::string toInsert, std::string original, int pos);
+   std::string string_delete(std::string string, int pos, int amount);
+   std::string AddObstacles(std::string strTemp, RandomNumberGenerator* rng);
+   std::string CreateSystemString(std::string prompt, std::string outputFile = "output.png", int steps = 40, int cfgScale = 7, int seed = -1, bool includeFaithful = true);
 
    public:
    DungeonLevel level;
@@ -91,24 +96,22 @@ class DungeonCreator : public Node2D{
    void AddTilemapEdge(TileMap* tilemap);
    std::pair<Vector2i, int> GetBlockAtlasPos(RandomNumberGenerator* rng, char type, bool startRoom = false);
 
-   std::string string_insert(std::string toInsert, std::string original, int pos);
-   std::string string_delete(std::string string, int pos, int amount);
 
-   std::string AddObstacles(std::string strTemp, RandomNumberGenerator* rng);
 
    void RunSDGen(String prompt);
    void RunGen(std::string prompt, std::string fileName);
+   void CreateBackground(std::string prompt, std::string fileName);
    void CombineImages();
    cv::Mat GetAndResizeTo64(std::string file);
 
    void GenerateImages();
 
    void UpdateTileset();
+
    private:
    String GPTString = "Empty";
    String imageString = "Empty";
    PackedStringArray m_Themes;
-   std::string CreateSystemString(std::string prompt, std::string outputFile = "output.png", int steps = 40, int cfgScale = 7, int seed = -1, bool includeFaithful = true);
    
    
 
