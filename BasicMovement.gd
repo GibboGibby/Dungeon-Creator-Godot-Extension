@@ -28,8 +28,9 @@ func _on_dungeon_creator_generating_complete(starting_position: Vector2) -> void
 	#print("signal received on the character")
 	print(starting_position)
 	#print(Vector2((starting_position.x * 10) + 5, (starting_position.y * 8) + 4))
-	var newPos = Vector2((starting_position.x * 10) + 5, (starting_position.y * 8) - 4) 
-	position = Vector2(newPos.x * 64, newPos.y * -64)
+	#var newPos = Vector2((starting_position.x * 10) + 5, (starting_position.y * 8) - 4) 
+	#position = Vector2(newPos.x * 64, newPos.y * -64)
+	position = starting_position
 	#print(position)
 	pass # Replace with function body.
 

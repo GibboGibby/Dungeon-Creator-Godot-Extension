@@ -42,6 +42,7 @@ struct DungeonLevel
    }
    int roomLayout[4][4];
    Vector2i startingPosition;
+   Vector2 actualStartingPosition;
    Vector2i endingPosition;
    std::string roomString[4][4];
 };

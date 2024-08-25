@@ -37,7 +37,7 @@ func _process(delta: float) -> void:
 		regenerate_tileset_texture()
 		shouldRefresh = false
 	
-	if Input.is_action_pressed("NewDungeon"):
+	if Input.is_action_just_pressed("NewDungeon"):
 		DoAllTheGenerating()
 	if Input.is_action_pressed("SDGen"):
 		RunSDGen("seamless interesting mossy stone bricks")
@@ -48,6 +48,7 @@ func _process(delta: float) -> void:
 		generate_images()
 		regenerate_tileset_texture()
 		
+	
 	
 
 func remove_tile(pos: Vector2i):

@@ -391,7 +391,7 @@ void DungeonCreator::GenerateDungeon()
             }
             else
             {
-                direction = 2;
+                direction = 1;
             }
         }
         else if (whereToGoNext == 4 || whereToGoNext == 5 || whereToGoNext == 6)
@@ -562,13 +562,13 @@ std::string DungeonCreator::GetRoomLayout(int x, int y)
         }
         switch(n)
 	    {
-	        case 1: { strTemp = "00000000006000060000000000000000000000000008000000000000000000000000001119111111"; break; }
-	        case 2: { strTemp = "00000000000000000000000000000000000000000008000000000000000000000000001111119111"; break; }
+	        case 1: { strTemp = "00000000006000060000000000000000000000000008000000000000000000000000001111111111"; break; }
+	        case 2: { strTemp = "00000000000000000000000000000000000000000008000000000000000000000000001111111111"; break; }
 	        case 3: { strTemp = "00000000000010021110001001111000110111129012000000111111111021111111201111111111"; break; }
 	        case 4: { strTemp = "00000000000111200100011110010021111011000000002109011111111102111111121111111111"; break; }
 	        // no drop
-	        case 5: { strTemp = "60000600000000000000000000000000000000000008000000000000000000000000001111111191"; break; }
-	        case 6: { strTemp = "11111111112222222222000000000000000000000008000000000000000000000000001911111111"; break; }
+	        case 5: { strTemp = "60000600000000000000000000000000000000000008000000000000000000000000001111111111"; break; }
+	        case 6: { strTemp = "11111111112222222222000000000000000000000008000000000000000000000000001111111111"; break; }
 	    }
     }
     else if (type == 0)
@@ -703,8 +703,8 @@ std::string DungeonCreator::GetRoomLayout(int x, int y)
 std::string DungeonCreator::AddObstacles(std::string strTemp, RandomNumberGenerator* rng)
 {
     // Remove once function works and stuff
-    return strTemp;
-    for (int i = 1; i < 81; i += 1)
+    //return strTemp;
+    for (int i = 0; i < 80; i += 1)
 	{
 	    int j = i;
   
@@ -767,35 +767,49 @@ std::string DungeonCreator::AddObstacles(std::string strTemp, RandomNumberGenera
 	        }
 	    }
     
+        
 	    if (tile == '5' || tile == '6' || tile == '8')
 	    {
-            
+            UtilityFunctions::print(("obs 1 - " + strObs1).c_str());
+            UtilityFunctions::print(("obs 2 - " + strObs2).c_str());
+            UtilityFunctions::print(("obs 3 - " + strObs3).c_str());
+
+            UtilityFunctions::print(("Just before running the inserts and stuff - " + strTemp).c_str());
+            UtilityFunctions::print(("found at - " + std::to_string(j)).c_str());
+            //UtilityFunctions::print(strTemp);
             // Delete 5 chars from strTemp at j
 	        strTemp = string_delete(strTemp, j, 5);
+            UtilityFunctions::print(("Just after string_delete - " + strTemp).c_str());
             // Insert from strObs into strTemp at j
 	        strTemp = string_insert(strObs1, strTemp, j);
+            UtilityFunctions::print(("Just after string_insert - " + strTemp).c_str());
 	        j += 10;
+            UtilityFunctions::print(("j is now at - " + std::to_string(j)).c_str());
 	        strTemp = string_delete(strTemp, j, 5);
 	        strTemp = string_insert(strObs2, strTemp, j);
 	        j += 10;
+            UtilityFunctions::print(("j is now at - " + std::to_string(j)).c_str());
 	        strTemp = string_delete(strTemp, j, 5);
 	        strTemp = string_insert(strObs3, strTemp, j);
-            
+
+            UtilityFunctions::print("all have been successfully added");
 	    }
 	}
+    UtilityFunctions::print("about to return");
+    return strTemp;
 }
 
 std::string DungeonCreator::string_insert(std::string toInsert, std::string original, int pos)
 {
     pos = pos;
-    original.insert(pos, toInsert);
+    original = original.insert(pos, toInsert);
     return original;
 }
 
 std::string DungeonCreator::string_delete(std::string string, int pos, int amount)
 {
     pos = pos;
-    string.erase(pos, amount);
+    string = string.erase(pos, amount);
     return string;
 }
 
@@ -834,14 +848,14 @@ std::string DungeonCreator::CreateSystemString(std::string prompt, std::string o
     
     std::string extraParams = "--steps " + std::to_string(steps) + " --cfg-scale " + std::to_string(cfgScale) + " -s " + std::to_string(seed);
     std::string savedFile = "ai_images/";
-
+	/*
     String userDirBad = OS::get_singleton()->get_user_data_dir();
     std::string userDir = userDirBad.utf8().get_data();
     if (userDir.back() != "/")
     {
         userDir.append("/");
     }
-    
+    */
     // savedFile = userDir;
 
     std::string systemString = sdPath + " -m " + dreamshaper + " -p " + finalPrompt + " --lora-model-dir " + baseFolder + " " + extraParams + " -o " + savedFile + outputFile;
@@ -973,6 +987,26 @@ void DungeonCreator::GenerateImages()
 
 Vector2i DungeonCreator::GetStartingRoomPosition()
 {
+    return level.actualStartingPosition;
+    std::string temp = level.roomString[level.startingPosition.y][level.startingPosition.x];
+    int pos = 0;
+    for (int i = 0; i < 80; i++)
+    {
+        if (temp.at(i) == '9')
+        {
+            int relative_x = i % 10;
+            int relative_y = i / 10;
+            relative_y *= -1;
+            TileMap* tileMap = dynamic_cast<TileMap*>(find_child("TileMap"));
+            Vector2 basePos = tileMap->get_position();
+            Vector2i tileSize = tileMap->get_tileset()->get_tile_size();
+            Vector2i baseOffset = tileSize * 20;
+            baseOffset.y *= -1;
+            basePos += baseOffset;
+            basePos += Vector2i(relative_x * tileSize.x, relative_y * tileSize.y);
+            return basePos;
+        }
+    }
     return level.startingPosition;
 }
 
@@ -1095,6 +1129,15 @@ void DungeonCreator::GenerateChunk(TileMap* tilemap, int x, int y)
         }
     }
 
+    if (x == level.startingPosition.x && y == level.startingPosition.y)
+    {
+        UtilityFunctions::print("starting room layout is: ");
+        for (int i = 0; i < 8; i++)
+        {
+            UtilityFunctions::print(levelRows[i].c_str());
+        }
+    }
+
     RandomNumberGenerator* rng = memnew(RandomNumberGenerator);
     
     
@@ -1113,6 +1156,10 @@ void DungeonCreator::GenerateChunk(TileMap* tilemap, int x, int y)
             }
             else
             {
+                if (atlasPosAndID.first == tiles["entrance"])
+                {
+                    level.actualStartingPosition = tilemap->map_to_local(Vector2i(j,i) + offsetAmount);
+                }
                 tilemap->set_cell(0, Vector2i(j,i) + offsetAmount, atlasPosAndID.second, atlasPos);
                 /*
                 if (atlasPos == tiles["ladder"] || atlasPos == tiles["ladder_top"])
@@ -1263,6 +1310,17 @@ std::pair<Vector2i, int> DungeonCreator::GetBlockAtlasPos(RandomNumberGenerator*
         {
             block = "exit";
             UtilityFunctions::print("it was an exit room");
+        }
+    }
+    else if (type == '7')
+    {
+        if (GibRand(rng, 1, 3) == 1)
+        {
+            block = "spike";
+        }
+        else
+        {
+            block = "empty";
         }
     }
     else
