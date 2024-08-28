@@ -78,9 +78,9 @@ String DungeonCreator::gpt_complete()
     return newString;
 }
 
+std::string apiKey = "";
 std::string DungeonCreator::GetImage(const std::string& prompt, const std::string& model)
 {
-    std::string apiKey = "sk-proj-QP7gwmynJNQGPhWlwXCXT3BlbkFJz0ridvHNwxDLxobZy5pZ";
     std::string baseUrl = "https://api.openai.com/v1/images/generations";
 
     std::string readBuffer;
@@ -159,7 +159,6 @@ String DungeonCreator::gpt_image()
 }
 
 
-std::string apiKey = "sk-proj-QP7gwmynJNQGPhWlwXCXT3BlbkFJz0ridvHNwxDLxobZy5pZ";
 std::string DungeonCreator::GetCompletion(const std::string& prompt, const std::string& model)
 {
     // URL and string to store response in
@@ -176,10 +175,10 @@ std::string DungeonCreator::GetCompletion(const std::string& prompt, const std::
         // Custom role (For better responses)
         requestData["messages"][0]["role"] = "system";
         requestData["messages"][0]["content"] = "You are a dungeon creation assisstant specializing in generating genres/themes"
-        " and description for tiles in a 2D side-scrolling dungeon game. The genres/themes should be concise, creative and interesting. "
-        "Consider the following genres: fantasy, medieval, dark, mystical, ancient ruins, steampunk, dark gothic, wasteland, hell, fairy"
-        " garden. Each tile description should be very generic as the tiles will be used everywhere and will be tiling with eachother."
-        " Be creative and ensure the descriptions are cohesive and engaging.";
+        " and description for tiles in a 2D side-scrolling dungeon game. The genres/themes should be concise, creative and interesting."
+        " Consider the following genres as inspiration: fantasy, medieval, dark, mystical, ancient ruins, steampunk, dark gothic, wasteland, hell, fairy garden, cyberpunk, neon punk. Pick a random theme not just one of these."
+        " Each tile description should be very generic as the tiles will be used everywhere and will be tiling with eachother."
+        " Be creative and ensure the descriptions are cohesive. Ensure that each description is only a few words and fits the description of a tile for a 2D game";
         requestData["messages"][1]["role"] = "user";
         requestData["messages"][1]["content"] = prompt;
         // How deterministic the response is
@@ -824,7 +823,12 @@ cv::Mat DungeonCreator::GetAndResizeTo64(std::string file)
 void DungeonCreator::RunGen(std::string prompt, std::string fileName)
 {
     std::string systemString = CreateSystemString(prompt, fileName);
+    std::chrono::high_resolution_clock::time_point start = std::chrono::high_resolution_clock::now();
     system(systemString.c_str());
+    std::chrono::high_resolution_clock::time_point end = std::chrono::high_resolution_clock::now();
+    auto seconds = std::chrono::duration_cast<std::chrono::seconds>(end - start);
+    std::string str = "Time to gen - " + fileName + " was - " + std::to_string(seconds.count()) + " seconds";
+    UtilityFunctions::print(str.c_str());
 }
 
 void DungeonCreator::CreateBackground(std::string prompt, std::string fileName)
@@ -839,7 +843,7 @@ std::string DungeonCreator::CreateSystemString(std::string prompt, std::string o
 
     std::string sdPath = "sd\\sd.exe";
     std::string baseFolder = "\"models\"";
-    std::string dreamshaper = "\"C:\\Users\\james\\Downloads\\downloaded_models\\dreamshaper_8.safetensors\"";
+    std::string dreamshaper = "\"models\\dreamshaper_8.safetensors\"";
     std::string finalPrompt;
     if (includeFaithful)
         finalPrompt = "\"" + prompt + "<lora:faithful32:1>\"";
@@ -934,43 +938,44 @@ void DungeonCreator::GenerateImages()
     // Generate dirt
     // Example dirt gpt string
     // describe a block texture for a game similar in role to dirt (such as sand, soil, gravel etc) that has a dark gothic theme in around 10 words with the first two being seamless and interesting
-    std::string basicDirtString = "describe a tile for a 2D side-scroller dungeon game similar in role to dirt (such as dirt, sand, soil, gravel etc) with the genre: '" + themeString + "' in around 7 words";
+    std::string basicDirtString = "describe a tile for a 2D side-scroller dungeon game similar in role to dirt (such as dirt, sand, soil, gravel etc) with the genre: '" + themeString + "' in around 5 words";
     std::string dirtOutput = GetCompletion(basicDirtString);
     UtilityFunctions::print(("dirt output - " + dirtOutput).c_str());
     
     // Generate Stone
-    std::string basicStoneString = "describe a tile for a 2D side-scroller dungeon game similar in role to stone (such as stone, stone bricks, cobblestone, concrete etc) with the genre: '" + themeString + "' in around 7 words";
+    std::string basicStoneString = "describe a tile for a 2D side-scroller dungeon game similar in role to stone (such as stone, stone bricks, cobblestone, concrete etc) with the genre: '" + themeString + "' in around 5 words, be broad as the tiles should not contain too much information";
     std::string stoneOutput = GetCompletion(basicStoneString);
     UtilityFunctions::print(("stone output - " + stoneOutput).c_str());
 
-    std::string exitString = "describe a tile for a 2D side-scroller dungeon game that is the exit of a level, resembling an open door with the theme: '" + themeString + "' in around 7 words";
+    std::string exitString = "describe a tile for a 2D side-scroller dungeon game that is the exit of a level, resembling an open door with the theme: '" + themeString + "' in around 5 words, be broad as the tiles should not contain too much information";
     std::string exitOutput = GetCompletion(exitString);
     UtilityFunctions::print(("exit output - " + exitOutput).c_str());
 
-    std::string ladderString = "describe a tile for a 2D side-scroller dungeon game that is a ladder with the theme: '" + themeString + "' in around 7 words";
+    std::string ladderString = "describe a tile for a 2D side-scroller dungeon game that is a ladder with the theme: '" + themeString + "' in around 5 words, be broad as the tiles should not contain too much information";
     std::string ladderOutput = GetCompletion(ladderString);
     UtilityFunctions::print(("ladder output - " + ladderOutput).c_str());
     
-    std::string ladderTopString = "describe a tile for a 2D side-scroller dungeon game that is a ladder with a platform to stand on with the theme: '" + themeString + "' in around 7 words";
+    std::string ladderTopString = "describe a tile for a 2D side-scroller dungeon game that is a ladder with a platform to stand on with the theme: '" + themeString + "' in around 5 words, be broad as the tiles should not contain too much information";
     std::string ladderTopOutput = GetCompletion(ladderTopString);
     UtilityFunctions::print(("ladder top output - " + ladderTopOutput).c_str());
     
-    std::string entranceString = "describe a tile for a 2D side-scroller dungeon game that is the entrance of a level, resembling an closed door with the theme: '" + themeString + "' in around 7 words";
+    std::string entranceString = "describe a tile for a 2D side-scroller dungeon game that is the entrance of a level, resembling an closed door with the theme: '" + themeString + "' in around 5 words, be broad as the tiles should not contain too much information";
     std::string entranceOutput = GetCompletion(entranceString);
     UtilityFunctions::print(("entrance output - " + entranceOutput).c_str());
     
-    std::string outerWallString = "describe a tile for a 2D side-scroller dungeon game which is the outer wall, which uses dark colours with the theme: '" + themeString + "' in around 7 words";
+    std::string outerWallString = "describe a tile for a 2D side-scroller dungeon game which is the outer wall, which uses dark colours with the theme: '" + themeString + "' in around 5 words, be broad as the tiles should not contain too much information";
     std::string outerWallOutput = GetCompletion(outerWallString);
     UtilityFunctions::print(("outer wall output - " + outerWallOutput).c_str());
 
-    std::string spikeString = "describe the tile for a 2D side-scroller dungeon game spikes with the theme: '" + themeString + "' in around 8 words";
+    std::string spikeString = "describe the tile for a 2D side-scroller dungeon game spikes with the theme: '" + themeString + "' in around 5 words, be broad as the tiles should not contain too much information";
     std::string spikeOutput = GetCompletion(spikeString);
     UtilityFunctions::print(("spike output - " + spikeOutput).c_str());
 
+    std::chrono::high_resolution_clock::time_point start = std::chrono::high_resolution_clock::now();
     RunGen("seamless and interesting " + dirtOutput, "dirt.png");
-    RunGen("seamless and interesting " + dirtOutput, "dirt_variant.png");
+    RunGen(dirtOutput, "dirt_variant.png");
 
-    RunGen("seamless and interesting " + stoneOutput, "stone.png");
+    RunGen(stoneOutput, "stone.png");
     RunGen(exitOutput, "exit.png");
     RunGen(ladderOutput, "ladder.png");
     RunGen(ladderTopOutput, "ladder_top.png");
@@ -979,10 +984,19 @@ void DungeonCreator::GenerateImages()
     RunGen(spikeOutput, "spike.png");
 
     CombineImages();
+    std::chrono::high_resolution_clock::time_point afterAllGenAndCombine = std::chrono::high_resolution_clock::now();
+    auto timeTaken = std::chrono::duration_cast<std::chrono::seconds>(afterAllGenAndCombine - start);
+    std::string output = "Time taken to generate and combine images is - " + std::to_string(timeTaken.count());
+    UtilityFunctions::print(output.c_str());
+    std::string backgroundPrompt = "background that takes up the whole level for a 2D side-scroller dungeon game with the theme: '" + themeString + "'";
+    //DownloadFile(GetImageGodotOnly3(String(backgroundPrompt.c_str())));
+    CreateBackground(backgroundPrompt, "background_image.png");
+    cv::Mat background = cv::imread("ai_images/background_image.png");
 
-    std::string backgroundPrompt = "generate a background for a 2D side-scroller dungeon game with the theme: '" + themeString + "'";
-    DownloadFile(GetImageGodotOnly3(String(backgroundPrompt.c_str())));
-    
+    String string = OS::get_singleton()->get_user_data_dir();
+    std::string str = string.utf8().get_data();
+    //cv::imwrite()
+    cv::imwrite((str + "/background_image.png").c_str(), background);
 }
 
 Vector2i DungeonCreator::GetStartingRoomPosition()

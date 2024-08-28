@@ -8,8 +8,9 @@ signal generating_complete(starting_position: Vector2)
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
+	if (FileAccess.file_exists("user://combined_tileset.png")):
+		regenerate_tileset_texture()
 	generate_tilemap_edge(tile_map)
-	regenerate_tileset_texture()
 	DoAllTheGenerating()
 	
 	#GenAndDownloadImage()
